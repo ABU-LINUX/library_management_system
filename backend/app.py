@@ -54,6 +54,49 @@ def logout():
 def dashboard():
     return render_template('dashboard.html')
 
+# --- Automated Cron Endpoint ---
+@app.route('/api/cron/send_reminders', methods=['GET'])
+def send_reminders():
+    """
+    Triggered daily by Vercel Cron.
+    Sweeps active users and sends Twilio reminders if exactly 3 days left.
+    """
+    from services.google_sheets_api import GoogleSheetsAPI
+    from services.notification_gateway import NotificationGateway
+    from services.billing_logic import BillingLogic
+    from datetime import datetime
+
+    db = GoogleSheetsAPI()
+    gateway = NotificationGateway()
+    
+    seats = db.get_all_seats()
+    today = datetime.now().date()
+    sent_count = 0
+    
+    for seat in seats:
+        if seat.get('is_occupied') and seat.get('end_date') and seat.get('mobile'):
+            try:
+                end_date = datetime.strptime(seat['end_date'], "%Y-%m-%d").date()
+                diff_days = (end_date - today).days
+                
+                # Send reminder exactly 3 days out
+                if diff_days == 3:
+                    gateway.send_expiration_reminder(
+                        seat['mobile'], 
+                        seat['student_name'], 
+                        diff_days
+                    )
+                    sent_count += 1
+            except Exception as e:
+                print(f"Error processing seat {seat.get('seat_number')}: {e}")
+                continue
+                
+    return app.response_class(
+        response=json.dumps({"success": True, "messages_dispatched": sent_count}),
+        status=200,
+        mimetype='application/json'
+    )
+
 # Register modular routes (Wait to import until app is created)
 from routes import seat_routes, student_routes
 app.register_blueprint(seat_routes.bp)

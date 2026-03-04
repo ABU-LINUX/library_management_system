@@ -4,5 +4,9 @@
   "library_name": "Advanced Study Room",
   "admin_username": "admin",
   "admin_password": "password123",
-  "secret_key": "supersecretkey"
+  "secret_key": "supersecretkey",
+  "twilio_account_sid": "TWILIO_ACCOUNT_SID_HERE",
+  "twilio_auth_token": "TWILIO_AUTH_TOKEN_HERE",
+  "twilio_whatsapp_number": "whatsapp:+14155238886",
+  "twilio_sms_number": "+1234567890"
 }
