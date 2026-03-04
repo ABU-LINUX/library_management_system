@@ -1,0 +1,170 @@
+/* responsive_grid.css - Natural Elegant Overhaul */
+
+.seat-grid-container {
+    background: var(--surface);
+    padding: 48px;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border);
+}
+
+.legend {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+    background: var(--bg-color);
+    padding: 16px 32px;
+    border-radius: 100px;
+    /* Pill shaped legend */
+    border: 1px solid var(--border);
+    justify-content: center;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 500;
+    font-size: 13px;
+    color: var(--text-secondary);
+    letter-spacing: 0.02em;
+}
+
+.box {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    /* Dots instead of boxes for elegance */
+    display: inline-block;
+}
+
+/* Elegant Status Colors - Solid visible colors */
+.green {
+    background-color: var(--vacant);
+    color: var(--vacant-text);
+}
+
+.box.green {
+    background-color: var(--vacant);
+    border: 1px solid var(--vacant);
+}
+
+.red {
+    background-color: var(--occupied);
+    color: var(--occupied-text);
+}
+
+.box.red {
+    background-color: var(--occupied);
+    border: 1px solid var(--occupied);
+}
+
+.yellow {
+    background-color: var(--expiring);
+    color: var(--expiring-text);
+}
+
+.box.yellow {
+    background-color: var(--expiring);
+    border: 1px solid var(--expiring);
+}
+
+/* Pending uses subtle border/glow */
+.purple-border {
+    background-color: var(--surface);
+    color: var(--pending);
+    /* Changed from --pending-text to --pending so text is visible on the surface background */
+    border: 2px solid var(--pending);
+    font-weight: 600;
+}
+
+.box.purple-border {
+    border: 2px solid var(--pending);
+    background-color: var(--surface);
+}
+
+/* CSS Grid 81 Seats */
+.seat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(55px, 1fr));
+    gap: 16px;
+}
+
+.seat {
+    aspect-ratio: 1;
+    min-width: 50px;
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 500;
+    font-family: var(--font-body);
+    border-radius: var(--radius-md);
+    /* Soft rounded squares */
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+    /* Prevents layout shift on hover */
+}
+
+/* Natural interaction states */
+.seat:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    filter: brightness(0.98);
+}
+
+.seat:active {
+    transform: scale(0.96);
+    box-shadow: none;
+}
+
+/* Specific Hover adjustments to keep the aesthetics soft but visible */
+.seat.green:hover {
+    background-color: #047857;
+    color: #ffffff;
+}
+
+.seat.red:hover {
+    background-color: #be123c;
+    color: #ffffff;
+}
+
+.seat.yellow:hover {
+    background-color: #b45309;
+    color: #ffffff;
+}
+
+.seat.purple-border:hover {
+    border-color: #5b21b6;
+    color: #5b21b6;
+}
+
+/* Responsive Overrides */
+@media (max-width: 768px) {
+    .seat-grid-container {
+        padding: 24px;
+    }
+
+    .seat-grid {
+        grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
+        gap: 10px;
+    }
+
+    .seat {
+        min-width: 40px;
+        min-height: 40px;
+        font-size: 14px;
+    }
+
+    .legend {
+        padding: 16px;
+        border-radius: var(--radius-lg);
+        gap: 12px;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

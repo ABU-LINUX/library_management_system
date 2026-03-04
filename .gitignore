@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+env/
+venv/
+.env
+.venv
+env.bak/
+venv.bak/
+
+receipts/*.pdf
+!receipts/.gitkeep
+
+.DS_Store

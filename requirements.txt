@@ -1,0 +1,6 @@
+Flask==3.0.0
+gspread==5.12.0
+google-auth==2.23.0
+reportlab==4.0.7
+pytest==7.4.3
+requests==2.31.0

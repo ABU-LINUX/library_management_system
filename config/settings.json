@@ -1,0 +1,8 @@
+{
+  "total_fee": 799,
+  "seat_capacity": 81,
+  "library_name": "Advanced Study Room",
+  "admin_username": "admin",
+  "admin_password": "password123",
+  "secret_key": "supersecretkey"
+}
