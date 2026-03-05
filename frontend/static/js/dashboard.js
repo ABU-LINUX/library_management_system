@@ -264,15 +264,36 @@ function openSeatModal(seatNumber) {
                     </form>
             `;
     } else {
+        // Calculate subscription plan
+        const planLabel = (() => {
+            if (seat.start_date && seat.end_date) {
+                const start = new Date(seat.start_date);
+                const end = new Date(seat.end_date);
+                const diffDays = Math.round((end - start) / (1000 * 60 * 60 * 24));
+                if (diffDays >= 85) return '90-Day Plan';
+                return '30-Day Plan';
+            }
+            return 'N/A';
+        })();
+
         title.innerText = `Student Profile - Seat ${seatNumber}`;
         body.innerHTML = `
             <div class="profile-card">
                 <div class="profile-detail"><span class="detail-label">Name</span><span class="detail-value">${seat.student_name}</span></div>
                 <div class="profile-detail"><span class="detail-label">Mobile</span><span class="detail-value">${seat.mobile}</span></div>
                 <div class="profile-detail"><span class="detail-label">Address</span><span class="detail-value">${seat.address || 'N/A'}</span></div>
-                <div class="profile-detail"><span class="detail-label">Pending Dues</span><span class="detail-value" style="color: ${parseFloat(seat.pending_balance) > 0 ? 'var(--occupied)' : 'var(--vacant)'}; font-weight: 600;">₹${seat.pending_balance}</span></div>
+                <div class="profile-detail"><span class="detail-label">Exam Prep</span><span class="detail-value">${seat.exam_prep || 'N/A'}</span></div>
+                <div class="profile-detail"><span class="detail-label">Plan</span><span class="detail-value" style="font-weight:700; color: var(--primary);">${planLabel}</span></div>
                 <div class="profile-detail"><span class="detail-label">Start Date</span><span class="detail-value">${seat.start_date}</span></div>
                 <div class="profile-detail"><span class="detail-label">End Date</span><span class="detail-value">${seat.end_date}</span></div>
+                <div class="profile-detail"><span class="detail-label">Total Fee</span><span class="detail-value">₹${seat.total_amount}</span></div>
+                <div class="profile-detail"><span class="detail-label">Amount Paid</span><span class="detail-value" style="color: var(--vacant); font-weight: 600;">₹${seat.amount_paid}</span></div>
+                <div class="profile-detail"><span class="detail-label">Pending Dues</span><span class="detail-value" style="color: ${parseFloat(seat.pending_balance) > 0 ? 'var(--occupied)' : 'var(--vacant)'}; font-weight: 600;">₹${seat.pending_balance}</span></div>
+            </div>
+
+            <div class="section-title" style="margin-top: 20px;">💳 Transaction History</div>
+            <div id="txn_history_container" style="margin-bottom: 16px; max-height: 220px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px; background: var(--card-bg);">
+                <div style="padding: 20px; text-align: center; color: var(--text-secondary); font-size: 13px;">Loading transactions...</div>
             </div>
 
             <div class="section-title">Actions</div>
@@ -311,6 +332,38 @@ function openSeatModal(seatNumber) {
             <button class="btn-edit full-width" onclick="showEditDialog(${seatNumber})" style="background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; border: none; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; width: 100%; margin-bottom: 8px;">✏️ Edit Student Details</button>
             <button class="btn-danger full-width" onclick="showCancelDialog(${seatNumber})">Cancel Registration</button>
         `;
+
+        // Lazy-load transaction history AFTER HTML is in the DOM
+        fetch(`/api/students/${seatNumber}/history`)
+            .then(r => r.json())
+            .then(res => {
+                const container = document.getElementById('txn_history_container');
+                if (!container) return;
+                if (!res.success || res.data.length === 0) {
+                    container.innerHTML = '<div style="padding: 16px; text-align: center; color: var(--text-secondary); font-size: 13px;">No transactions recorded yet.</div>';
+                    return;
+                }
+                let html = `
+                    <div style="padding: 8px 12px; background: var(--primary-bg); border-bottom: 1px solid var(--border); font-size: 12px; font-weight: 600; color: var(--text-secondary); display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px;">
+                        <span>#</span><span>Date</span><span>Type</span><span>Amount / Mode</span>
+                    </div>`;
+                res.data.forEach((tx, idx) => {
+                    html += `
+                    <div style="padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: 13px; display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; align-items: center;">
+                        <span style="color: var(--text-secondary); font-size: 12px;">${idx + 1}</span>
+                        <span>${tx.date || '—'}</span>
+                        <span style="font-weight: 600; color: ${tx.type === 'Registration' ? 'var(--primary)' : tx.type === 'Renewal' ? 'var(--vacant)' : 'var(--pending)'};">${tx.type || '—'}</span>
+                        <span>₹${tx.amount || 0} <small style="color: var(--text-secondary);">(${tx.payment_mode || '—'})</small></span>
+                    </div>`;
+                });
+                html += `<div style="padding: 8px 12px; font-size: 12px; font-weight: 700; text-align: right; color: var(--text-secondary); border-top: 1px solid var(--border);">Total ${res.count} Transaction${res.count !== 1 ? 's' : ''}</div>`;
+                container.innerHTML = html;
+            })
+            .catch(() => {
+                const container = document.getElementById('txn_history_container');
+                if (container) container.innerHTML = '<div style="padding: 16px; text-align: center; color: var(--occupied); font-size: 13px;">Failed to load transactions.</div>';
+            });
+
     }
 
     modal.style.display = "block";

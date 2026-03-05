@@ -237,3 +237,17 @@ def get_transactions():
         return jsonify({"success": True, "data": transactions})
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 400
+
+@bp.route('/<int:seat_id>/history', methods=['GET'])
+def get_student_history(seat_id):
+    """Return all transactions for a specific seat number."""
+    try:
+        all_transactions = db.get_transactions()
+        student_txns = [
+            t for t in all_transactions
+            if str(t.get('seat_number', '')).strip() == str(seat_id)
+        ]
+        student_txns.sort(key=lambda x: x.get('date', ''), reverse=False)
+        return jsonify({"success": True, "data": student_txns, "count": len(student_txns)})
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 400
