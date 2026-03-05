@@ -295,8 +295,17 @@ function openSeatModal(seatNumber) {
                 <div class="profile-detail"><span class="detail-label">Mobile</span><span class="detail-value">${seat.mobile}</span></div>
                 <div class="profile-detail"><span class="detail-label">Address</span><span class="detail-value">${seat.address || 'N/A'}</span></div>
                 <div class="profile-detail"><span class="detail-label">Exam Prep</span><span class="detail-value">${seat.exam_prep || 'N/A'}</span></div>
-                <div class="profile-detail"><span class="detail-label">Start Date</span><span class="detail-value">${seat.start_date}</span></div>
-                <div class="profile-detail"><span class="detail-label">End Date</span><span class="detail-value">${seat.end_date}</span></div>
+                <!-- Start / End Date side-by-side highlighted -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 4px 0 8px;">
+                    <div style="padding: 12px 14px; border-radius: 10px; background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.35); text-align: center;">
+                        <div style="font-size: 10px; color: #6ee7b7; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px;">📅 Start Date</div>
+                        <div style="font-size: 15px; font-weight: 700; color: #10b981;">${seat.start_date}</div>
+                    </div>
+                    <div style="padding: 12px 14px; border-radius: 10px; background: rgba(239,68,68,0.10); border: 1px solid rgba(239,68,68,0.3); text-align: center;">
+                        <div style="font-size: 10px; color: #fca5a5; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px;">🏁 End Date</div>
+                        <div style="font-size: 15px; font-weight: 700; color: #ef4444;">${seat.end_date}</div>
+                    </div>
+                </div>
                 <div class="profile-detail"><span class="detail-label">Total Fee</span><span class="detail-value">₹${seat.total_amount}</span></div>
                 <div class="profile-detail"><span class="detail-label">Amount Paid</span><span class="detail-value" style="color: var(--vacant); font-weight: 600;">₹${seat.amount_paid}</span></div>
                 <div class="profile-detail"><span class="detail-label">Pending Dues</span><span class="detail-value" style="color: ${parseFloat(seat.pending_balance) > 0 ? 'var(--occupied)' : 'var(--vacant)'}; font-weight: 600;">₹${seat.pending_balance}</span></div>
