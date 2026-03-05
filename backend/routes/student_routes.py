@@ -1,8 +1,8 @@
 from flask import Blueprint, jsonify, request
-from services.google_sheets_api import GoogleSheetsAPI
-from services.billing_logic import BillingLogic
-from services.notification_gateway import NotificationGateway
-from utils.pdf_generator import generate_receipt
+from backend.services.google_sheets_api import GoogleSheetsAPI
+from backend.services.billing_logic import BillingLogic
+from backend.services.notification_gateway import NotificationGateway
+from backend.utils.pdf_generator import generate_receipt
 from datetime import datetime
 import os
 

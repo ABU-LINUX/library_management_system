@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from services.google_sheets_api import GoogleSheetsAPI
+from backend.services.google_sheets_api import GoogleSheetsAPI
 
 bp = Blueprint('seats', __name__, url_prefix='/api/seats')
 db = GoogleSheetsAPI()

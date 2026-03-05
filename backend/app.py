@@ -5,7 +5,10 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 
 # Adjust Python path to include models and services
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, project_root)
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+if os.path.join(project_root, 'backend') not in sys.path:
+    sys.path.insert(0, os.path.join(project_root, 'backend'))
 
 app = Flask(__name__, template_folder='../frontend/templates', static_folder='../frontend/static')
 
@@ -61,9 +64,9 @@ def send_reminders():
     Triggered daily by Vercel Cron.
     Sweeps active users and sends Twilio reminders if exactly 3 days left.
     """
-    from services.google_sheets_api import GoogleSheetsAPI
-    from services.notification_gateway import NotificationGateway
-    from services.billing_logic import BillingLogic
+    from backend.services.google_sheets_api import GoogleSheetsAPI
+    from backend.services.notification_gateway import NotificationGateway
+    from backend.services.billing_logic import BillingLogic
     from datetime import datetime
 
     db = GoogleSheetsAPI()
@@ -98,7 +101,7 @@ def send_reminders():
     )
 
 # Register modular routes (Wait to import until app is created)
-from routes import seat_routes, student_routes
+from backend.routes import seat_routes, student_routes
 app.register_blueprint(seat_routes.bp)
 app.register_blueprint(student_routes.bp)
 
