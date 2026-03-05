@@ -88,8 +88,8 @@ def renew_student(seat_id):
         
     try:
         days_to_add = int(data.get('days', 30))
-        additional_total = float(data.get('add_total_amount', 799))
-        additional_paid = float(data.get('add_amount_paid', 799))
+        additional_total = float(data.get('add_total_amount', 700))
+        additional_paid = float(data.get('add_amount_paid', 700))
         
         # Updates
         new_end_date = BillingLogic.calculate_end_date(seat['end_date'], days_to_add)

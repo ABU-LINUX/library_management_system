@@ -238,7 +238,7 @@ function openSeatModal(seatNumber) {
                             </div>
                             <div class="form-group">
                                 <label>Duration</label>
-                                <select id="duration" onchange="document.getElementById('total_amount').value = (this.value == '90') ? 1900 : 799">
+                                <select id="duration" onchange="document.getElementById('total_amount').value = (this.value == '90') ? 1900 : 700">
                                     <option value="30">30 Days</option>
                                     <option value="90">90 Days</option>
                                 </select>
@@ -246,7 +246,7 @@ function openSeatModal(seatNumber) {
                         </div>
                         
                         <div class="form-row">
-                            <div class="form-group"><label>Total Fee (₹)</label><input type="number" id="total_amount" value="799" required></div>
+                            <div class="form-group"><label>Total Fee (₹)</label><input type="number" id="total_amount" value="700" required></div>
                             <div class="form-group"><label>Amount Paid (₹)</label><input type="number" id="amount_paid" value="" required></div>
                         </div>
                         
@@ -324,7 +324,7 @@ function showRenewDialog(seatNumber) {
     if (durationSelect) durationSelect.value = "30";
 
     const totalDisplay = document.getElementById('renew_total_display');
-    if (totalDisplay) totalDisplay.innerText = "799";
+    if (totalDisplay) totalDisplay.innerText = "700";
 
     document.getElementById('renew_amount_paid').value = "0";
     renewModal.style.display = "block";
