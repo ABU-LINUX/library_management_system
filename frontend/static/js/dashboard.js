@@ -308,51 +308,76 @@ function openSeatModal(seatNumber) {
 
         title.innerText = `Student Profile - Seat ${seatNumber}`;
         body.innerHTML = `
-            <div class="profile-card">
-                <!-- Highlighted header row -->
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; padding: 14px 16px; border-radius: 10px; background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid rgba(99,102,241,0.3);">
-                    <div>
-                        <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px;">Seat Number</div>
-                        <div style="font-size: 28px; font-weight: 800; color: #f8fafc; font-family: 'Inter', sans-serif;">🪑 ${seatNumber}</div>
+            <div class="profile-card" style="padding: 12px;">
+                <!-- Compact header: Seat + Plan in one row -->
+                <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 14px; border-radius:10px; background:linear-gradient(135deg,#1e293b,#0f172a); margin-bottom:10px;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="font-size:20px;">🪑</span>
+                        <div>
+                            <div style="font-size:9px; color:#94a3b8; text-transform:uppercase; letter-spacing:.08em;">Seat</div>
+                            <div style="font-size:20px; font-weight:800; color:#f8fafc; line-height:1;">${seatNumber}</div>
+                        </div>
                     </div>
-                    <div style="text-align: right;">
-                        <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px;">Subscription Plan</div>
-                        <span style="display: inline-block; padding: 6px 16px; border-radius: 999px; font-size: 14px; font-weight: 700; letter-spacing: 0.05em; background: ${planLabel === '90-Day Plan' ? 'linear-gradient(135deg, #6366f1, #4f46e5)' : 'linear-gradient(135deg, #10b981, #059669)'}; color: white; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">${planLabel}</span>
-                    </div>
+                    <span style="padding:5px 14px; border-radius:999px; font-size:12px; font-weight:700; background:${planLabel === '90-Day Plan' ? 'linear-gradient(135deg,#6366f1,#4f46e5)' : 'linear-gradient(135deg,#10b981,#059669)'}; color:#fff;">${planLabel}</span>
                 </div>
 
-                <!-- Premium Student Name Card -->
-                <div style="padding: 24px 20px; border-radius: 14px; background: linear-gradient(135deg, #1e1b4b 0%, #3730a3 50%, #6d28d9 100%); text-align: center; margin-bottom: 14px; box-shadow: 0 6px 24px rgba(99,102,241,0.35);">
-                    <!-- Avatar circle with initials -->
-                    <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.45); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 22px; font-weight: 800; color: #ffffff; text-transform: uppercase; font-family: 'Inter', sans-serif; backdrop-filter: blur(4px);">
+                <!-- Compact Name Card -->
+                <div style="display:flex; align-items:center; gap:12px; padding:10px 14px; border-radius:10px; background:linear-gradient(135deg,#1e1b4b,#3730a3,#6d28d9); margin-bottom:10px; box-shadow:0 4px 14px rgba(99,102,241,.3);">
+                    <div style="width:42px; height:42px; border-radius:50%; background:rgba(255,255,255,.2); border:2px solid rgba(255,255,255,.4); display:flex; align-items:center; justify-content:center; font-size:17px; font-weight:800; color:#fff; flex-shrink:0;">
                         ${seat.student_name.trim().split(' ').map(w => w[0]).slice(0, 2).join('')}
                     </div>
-                    <div style="font-size: 11px; color: #c4b5fd; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 6px;">Student</div>
-                    <div style="font-size: 22px; font-weight: 800; color: #ffffff; font-family: 'Inter', sans-serif; line-height: 1.2; margin-bottom: 8px;">${seat.student_name}</div>
-                    <div style="font-size: 13px; color: #ddd6fe;">📞 ${seat.mobile}</div>
-                </div>
-                <div class="profile-detail"><span class="detail-label">Address</span><span class="detail-value">${seat.address || 'N/A'}</span></div>
-                <div class="profile-detail"><span class="detail-label">Exam Prep</span><span class="detail-value">${seat.exam_prep || 'N/A'}</span></div>
-                <!-- Start / End Date — solid colours, side by side -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 8px 0;">
-                    <div style="padding: 12px 14px; border-radius: 10px; background: #059669; text-align: center;">
-                        <div style="font-size: 10px; color: #d1fae5; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px;">📅 Start Date</div>
-                        <div style="font-size: 15px; font-weight: 700; color: #ffffff;">${seat.start_date}</div>
-                    </div>
-                    <div style="padding: 12px 14px; border-radius: 10px; background: #dc2626; text-align: center;">
-                        <div style="font-size: 10px; color: #fee2e2; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px;">🏁 End Date</div>
-                        <div style="font-size: 15px; font-weight: 700; color: #ffffff;">${seat.end_date}</div>
+                    <div style="min-width:0;">
+                        <div style="font-size:15px; font-weight:800; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${seat.student_name}</div>
+                        <div style="font-size:12px; color:#c4b5fd;">📞 ${seat.mobile}</div>
                     </div>
                 </div>
-                <div class="profile-detail"><span class="detail-label">Total Fee</span><span class="detail-value">₹${seat.total_amount}</span></div>
-                <div class="profile-detail"><span class="detail-label">Amount Paid</span><span class="detail-value" style="color: var(--vacant); font-weight: 600;">₹${seat.amount_paid}</span></div>
-                <div class="profile-detail"><span class="detail-label">Pending Dues</span><span class="detail-value" style="color: ${parseFloat(seat.pending_balance) > 0 ? 'var(--occupied)' : 'var(--vacant)'}; font-weight: 600;">₹${seat.pending_balance}</span></div>
+
+                <!-- Address + Exam Prep side by side -->
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
+                    <div style="background:var(--bg-color); border-radius:8px; padding:8px 10px; border:1px solid var(--border);">
+                        <div style="font-size:9px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.07em; margin-bottom:2px;">Address</div>
+                        <div style="font-size:12px; font-weight:600; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${seat.address || 'N/A'}</div>
+                    </div>
+                    <div style="background:var(--bg-color); border-radius:8px; padding:8px 10px; border:1px solid var(--border);">
+                        <div style="font-size:9px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.07em; margin-bottom:2px;">Exam Prep</div>
+                        <div style="font-size:12px; font-weight:600; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${seat.exam_prep || 'N/A'}</div>
+                    </div>
+                </div>
+
+                <!-- Start / End Date compact pills -->
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
+                    <div style="padding:8px 10px; border-radius:8px; background:#059669; text-align:center;">
+                        <div style="font-size:9px; color:#d1fae5; text-transform:uppercase; letter-spacing:.07em;">📅 Start</div>
+                        <div style="font-size:12px; font-weight:700; color:#fff;">${seat.start_date}</div>
+                    </div>
+                    <div style="padding:8px 10px; border-radius:8px; background:#dc2626; text-align:center;">
+                        <div style="font-size:9px; color:#fee2e2; text-transform:uppercase; letter-spacing:.07em;">🏁 End</div>
+                        <div style="font-size:12px; font-weight:700; color:#fff;">${seat.end_date}</div>
+                    </div>
+                </div>
+
+                <!-- Billing: 3 values in one row -->
+                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-bottom:4px;">
+                    <div style="text-align:center; padding:7px 4px; background:var(--bg-color); border-radius:8px; border:1px solid var(--border);">
+                        <div style="font-size:9px; color:var(--text-muted); text-transform:uppercase; margin-bottom:1px;">Total</div>
+                        <div style="font-size:13px; font-weight:700; color:var(--text-primary);">₹${seat.total_amount}</div>
+                    </div>
+                    <div style="text-align:center; padding:7px 4px; background:var(--bg-color); border-radius:8px; border:1px solid var(--border);">
+                        <div style="font-size:9px; color:var(--text-muted); text-transform:uppercase; margin-bottom:1px;">Paid</div>
+                        <div style="font-size:13px; font-weight:700; color:#059669;">₹${seat.amount_paid}</div>
+                    </div>
+                    <div style="text-align:center; padding:7px 4px; background:var(--bg-color); border-radius:8px; border:1px solid var(--border);">
+                        <div style="font-size:9px; color:var(--text-muted); text-transform:uppercase; margin-bottom:1px;">Dues</div>
+                        <div style="font-size:13px; font-weight:700; color:${parseFloat(seat.pending_balance) > 0 ? '#dc2626' : '#059669'};">₹${seat.pending_balance}</div>
+                    </div>
+                </div>
             </div>
 
-            <div class="section-title" style="margin-top: 20px;">💳 Transaction History</div>
-            <div id="txn_history_container" style="margin-bottom: 16px; max-height: 220px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px; background: var(--card-bg);">
-                <div style="padding: 20px; text-align: center; color: var(--text-secondary); font-size: 13px;">Loading transactions...</div>
+            <div class="section-title" style="margin-top:14px; margin-bottom:6px; font-size:13px;">💳 Transaction History</div>
+            <div id="txn_history_container" style="margin-bottom:12px; max-height:150px; overflow-y:auto; border:1px solid var(--border); border-radius:8px; background:var(--bg-color);">
+                <div style="padding:14px; text-align:center; color:var(--text-secondary); font-size:13px;">Loading...</div>
             </div>
+
 
             <div class="section-title">Actions</div>
             <div class="profile-actions">
