@@ -291,23 +291,23 @@ function openSeatModal(seatNumber) {
                     </div>
                 </div>
 
-                <!-- Student Name Highlight -->
-                <div style="padding: 14px 16px; border-radius: 10px; background: linear-gradient(135deg, rgba(251,191,36,0.15), rgba(245,158,11,0.08)); border: 1px solid rgba(251,191,36,0.4); text-align: center; margin-bottom: 10px;">
-                    <div style="font-size: 10px; color: #fcd34d; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px;">👤 Student Name</div>
-                    <div style="font-size: 20px; font-weight: 800; color: #fbbf24; font-family: 'Inter', sans-serif;">${seat.student_name}</div>
+                <!-- Student Name Highlight — solid amber, always visible -->
+                <div style="padding: 14px 16px; border-radius: 10px; background: #d97706; text-align: center; margin-bottom: 12px;">
+                    <div style="font-size: 10px; color: #fef3c7; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px;">👤 Student Name</div>
+                    <div style="font-size: 20px; font-weight: 800; color: #ffffff; font-family: 'Inter', sans-serif;">${seat.student_name}</div>
                 </div>
                 <div class="profile-detail"><span class="detail-label">Mobile</span><span class="detail-value">${seat.mobile}</span></div>
                 <div class="profile-detail"><span class="detail-label">Address</span><span class="detail-value">${seat.address || 'N/A'}</span></div>
                 <div class="profile-detail"><span class="detail-label">Exam Prep</span><span class="detail-value">${seat.exam_prep || 'N/A'}</span></div>
-                <!-- Start / End Date side-by-side highlighted -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 4px 0 8px;">
-                    <div style="padding: 12px 14px; border-radius: 10px; background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.35); text-align: center;">
-                        <div style="font-size: 10px; color: #6ee7b7; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px;">📅 Start Date</div>
-                        <div style="font-size: 15px; font-weight: 700; color: #10b981;">${seat.start_date}</div>
+                <!-- Start / End Date — solid colours, side by side -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 8px 0;">
+                    <div style="padding: 12px 14px; border-radius: 10px; background: #059669; text-align: center;">
+                        <div style="font-size: 10px; color: #d1fae5; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px;">📅 Start Date</div>
+                        <div style="font-size: 15px; font-weight: 700; color: #ffffff;">${seat.start_date}</div>
                     </div>
-                    <div style="padding: 12px 14px; border-radius: 10px; background: rgba(239,68,68,0.10); border: 1px solid rgba(239,68,68,0.3); text-align: center;">
-                        <div style="font-size: 10px; color: #fca5a5; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px;">🏁 End Date</div>
-                        <div style="font-size: 15px; font-weight: 700; color: #ef4444;">${seat.end_date}</div>
+                    <div style="padding: 12px 14px; border-radius: 10px; background: #dc2626; text-align: center;">
+                        <div style="font-size: 10px; color: #fee2e2; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px;">🏁 End Date</div>
+                        <div style="font-size: 15px; font-weight: 700; color: #ffffff;">${seat.end_date}</div>
                     </div>
                 </div>
                 <div class="profile-detail"><span class="detail-label">Total Fee</span><span class="detail-value">₹${seat.total_amount}</span></div>
