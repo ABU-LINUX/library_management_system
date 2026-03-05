@@ -687,7 +687,7 @@ function confirmCancel() {
 function downloadLastReceipt(seatNumber) {
     const seat = cachedSeats.find(s => s.seat_number == seatNumber);
     if (seat && seat.receipt_path) {
-        window.open(`/static/receipts/${seat.receipt_path.split('/').pop()}`, '_blank');
+        window.open(`/api/receipts/${seat.receipt_path.split('/').pop()}`, '_blank');
     } else {
         showToast("No receipt found or backend path unavailable.", "error");
     }

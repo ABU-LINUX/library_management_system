@@ -106,8 +106,7 @@ app.register_blueprint(seat_routes.bp)
 app.register_blueprint(student_routes.bp)
 
 from flask import send_from_directory
-@app.route('/static/receipts/<path:filename>')
-@login_required
+@app.route('/api/receipts/<path:filename>')
 def download_receipt(filename):
     receipts_dir = '/tmp/receipts'
     if not os.path.exists(receipts_dir):
