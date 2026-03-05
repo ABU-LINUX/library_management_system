@@ -261,6 +261,8 @@ h6 {
     top: 0;
     width: 100%;
     height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
     background-color: rgba(41, 37, 36, 0.3);
     backdrop-filter: blur(4px);
     animation: fadeIn 0.3s ease;
@@ -278,12 +280,12 @@ h6 {
 
 .modal-content {
     background-color: var(--surface);
-    margin: 6% auto;
+    margin: 4% auto 4% auto;
     padding: 48px;
     width: 90%;
     max-width: 580px;
-    max-height: 85vh;
-    overflow-y: auto;
+    max-height: none;
+    overflow-y: visible;
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-lg);
     border: 1px solid var(--border);
