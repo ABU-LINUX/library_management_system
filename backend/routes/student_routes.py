@@ -270,6 +270,24 @@ def download_receipt_ondemand(seat_id):
         except Exception:
             plan_days = '30'
 
+        # Fetch last transaction for this seat to get the CURRENT payment amount
+        try:
+            all_transactions = db.get_transactions()
+            seat_txns = [
+                t for t in all_transactions
+                if str(t.get('seat_number', '')).strip() == str(seat_id)
+            ]
+            # Sort by timestamp descending — latest transaction first
+            seat_txns.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
+            last_txn = seat_txns[0] if seat_txns else {}
+            current_payment = last_txn.get('amount', seat.get('amount_paid', 0))
+            txn_payment_mode = last_txn.get('payment_mode', seat.get('payment_mode', 'Offline'))
+            txn_type = last_txn.get('type', 'Registration')
+        except Exception:
+            current_payment = seat.get('amount_paid', 0)
+            txn_payment_mode = seat.get('payment_mode', 'Offline')
+            txn_type = 'Registration'
+
         student_data = {
             'student_name': seat.get('student_name', ''),
             'mobile': seat.get('mobile', ''),
@@ -281,8 +299,10 @@ def download_receipt_ondemand(seat_id):
             'total_amount': seat.get('total_amount', 0),
             'amount_paid': seat.get('amount_paid', 0),
             'pending_balance': seat.get('pending_balance', 0),
-            'payment_mode': seat.get('payment_mode', 'Offline'),
+            'current_payment': current_payment,   # ← amount from last single transaction
+            'payment_mode': txn_payment_mode,
             'days': plan_days,
+            'is_dues_clearance': txn_type == 'Dues Clearance',
         }
 
         pdf_buf = generate_receipt_bytes(student_data)
