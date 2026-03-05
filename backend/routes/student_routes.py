@@ -39,7 +39,7 @@ def register_student():
             "address": data.get('address'),
             "exam_prep": data.get('exam_prep'),
             "start_date": data.get('start_date', datetime.now().strftime("%Y-%m-%d")),
-            "total_amount": float(data.get('total_amount', 799)),
+            "total_amount": float(data.get('total_amount', 700)),
             "amount_paid": float(data.get('amount_paid', 0)),
             "payment_mode": data.get('payment_mode', 'Offline'),
             "is_occupied": True
