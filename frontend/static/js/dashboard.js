@@ -920,3 +920,18 @@ function printReport() {
         }, 300);
     };
 }
+
+// --- Left Side Panel Toggle ---
+let alertsPanelOpen = true;
+function toggleAlertsPanel() {
+    const content = document.getElementById('alertsPanelContent');
+    const chevron = document.getElementById('alertsPanelChevron');
+    alertsPanelOpen = !alertsPanelOpen;
+    if (alertsPanelOpen) {
+        content.style.display = 'block';
+        chevron.textContent = '▼';
+    } else {
+        content.style.display = 'none';
+        chevron.textContent = '▶';
+    }
+}

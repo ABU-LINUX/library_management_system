@@ -45,27 +45,43 @@
             <button class="btn-primary" onclick="searchStudent()" style="padding: 0 24px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer;">Search</button>
         </div>
 
-        <!-- Action List -->
-        <section class="action-list">
-            <h2>Today's Expirations / Action Required</h2>
-            <ul id="action_list_items">
-                <!-- Javascript will populate this -->
-            </ul>
-        </section>
+        <!-- Two-column layout: side panel + seat grid -->
+        <div style="display: flex; gap: 20px; align-items: flex-start;">
 
-        <!-- Seat Grid -->
-        <section class="seat-grid-container">
-            <div class="legend">
-                <span class="legend-item"><span class="box green"></span> Vacant</span>
-                <span class="legend-item"><span class="box red"></span> Occupied</span>
-                <span class="legend-item"><span class="box yellow"></span> Exp<3 Days</span>
-                <span class="legend-item"><span class="box purple-border"></span> Dues Pending</span>
+            <!-- LEFT SIDE PANEL: Alerts -->
+            <div id="alertsSidePanel" style="width: 270px; flex-shrink: 0; background: var(--surface); border-radius: 14px; border: 1px solid var(--border); box-shadow: 0 2px 12px rgba(0,0,0,0.06); overflow: hidden; position: sticky; top: 20px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: linear-gradient(135deg, #1e293b, #0f172a); cursor: pointer;" onclick="toggleAlertsPanel()">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 16px;">🔔</span>
+                        <span style="color: #f1f5f9; font-weight: 700; font-size: 14px;">Alerts &amp; Expirations</span>
+                    </div>
+                    <span id="alertsPanelChevron" style="color: #94a3b8; font-size: 12px; transition: transform 0.3s;">▼</span>
+                </div>
+                <div id="alertsPanelContent" style="padding: 12px;">
+                    <ul id="action_list_items" style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; max-height: 70vh; overflow-y: auto;">
+                        <!-- Javascript will populate this -->
+                    </ul>
+                </div>
             </div>
-            <div class="seat-grid" id="seat_grid">
-                <!-- Javascript will generate 81 seats here -->
+
+            <!-- RIGHT: Seat Grid -->
+            <div style="flex: 1; min-width: 0;">
+                <section class="seat-grid-container">
+                    <div class="legend">
+                        <span class="legend-item"><span class="box green"></span> Vacant</span>
+                        <span class="legend-item"><span class="box red"></span> Occupied</span>
+                        <span class="legend-item"><span class="box yellow"></span> Exp&lt;3 Days</span>
+                        <span class="legend-item"><span class="box purple-border"></span> Dues Pending</span>
+                    </div>
+                    <div class="seat-grid" id="seat_grid">
+                        <!-- Javascript will generate 81 seats here -->
+                    </div>
+                </section>
             </div>
-        </section>
+
+        </div>
     </main>
+
 
     <!-- Modal for Registration / Profile -->
     <div id="seatModal" class="modal">
