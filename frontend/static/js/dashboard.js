@@ -856,9 +856,7 @@ function printReport() {
         filterText = `${monthsFull[lastMonth]} ${yearOfLastMonth}`;
     }
 
-    // Create a new window for pure printing
-    const printWindow = window.open('', '_blank');
-
+    // Use a hidden iframe to avoid browser popup blockers
     const printDoc = `
         <!DOCTYPE html>
         <html>
@@ -874,9 +872,6 @@ function printReport() {
                 th, td { border-bottom: 1px solid #e2e8f0; padding: 10px 5px; }
                 th { background-color: #f8fafc; color: #475569; }
                 .total { text-align: right; font-size: 18px; font-weight: bold; margin-top: 20px; color: #10b981; }
-                @media print {
-                    button { display: none; }
-                }
             </style>
         </head>
         <body>
@@ -885,16 +880,14 @@ function printReport() {
                 <p>Financial Statements Report</p>
                 <p>Date Printed: ${new Date().toLocaleString()}</p>
             </div>
-            
             <div class="report-info">
                 <span>Period: ${filterText}</span>
                 <span>Total Revenue: Rs. ${totalRev}</span>
             </div>
-            
             <table>
                 <thead>
                     <tr>
-                        <th>Date & Time</th>
+                        <th>Date &amp; Time</th>
                         <th>Student Details</th>
                         <th>Transaction Type</th>
                         <th>Mode</th>
@@ -905,28 +898,28 @@ function printReport() {
                     ${tableBodyHTML}
                 </tbody>
             </table>
-            
-            <div class="total">
-                Final Total: Rs. ${totalRev}
-            </div>
-            
-            <div style="text-align: center; margin-top: 40px;">
-                <button onclick="window.print()" style="padding: 10px 20px; font-size: 16px;">Print Document</button>
-            </div>
-            
-            <script>
-                // Auto trigger print dialog when window is fully loaded
-                window.onload = function() {
-                    setTimeout(() => {
-                        window.print();
-                    }, 500);
-                }
-            </script>
+            <div class="total">Final Total: Rs. ${totalRev}</div>
         </body>
         </html>
     `;
 
-    printWindow.document.open();
-    printWindow.document.write(printDoc);
-    printWindow.document.close();
+    // Remove any old print iframe
+    const oldFrame = document.getElementById('_printFrame');
+    if (oldFrame) oldFrame.remove();
+
+    const iframe = document.createElement('iframe');
+    iframe.id = '_printFrame';
+    iframe.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;border:0;';
+    document.body.appendChild(iframe);
+
+    iframe.contentDocument.open();
+    iframe.contentDocument.write(printDoc);
+    iframe.contentDocument.close();
+
+    // Wait for content to load then print
+    iframe.onload = function () {
+        setTimeout(() => {
+            iframe.contentWindow.print();
+        }, 300);
+    };
 }
