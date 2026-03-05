@@ -2,78 +2,63 @@
   "active_seats": {
     "1": {
       "seat_number": 1,
-      "student_name": "Abubakar",
-      "mobile": "9381234662",
-      "exam_prep": "iit-jee",
-      "start_date": "2026-03-04",
-      "end_date": "2026-06-02",
-      "total_amount": 1900.0,
-      "amount_paid": 1900.0,
-      "pending_balance": 0,
-      "is_occupied": true,
-      "address": "nanachowk",
-      "payment_mode": "Online",
-      "receipt_path": "Receipt_Abubakar_20260304_1772622561.pdf"
+      "student_name": "",
+      "mobile": "",
+      "exam_prep": "",
+      "start_date": "",
+      "end_date": "",
+      "total_amount": 0.0,
+      "amount_paid": 0.0,
+      "pending_balance": 0.0,
+      "is_occupied": false
     },
     "2": {
       "seat_number": 2,
-      "student_name": "sudeep",
-      "mobile": "9381234662",
-      "exam_prep": "iit-jee",
-      "start_date": "2026-03-04",
-      "end_date": "2026-04-03",
-      "total_amount": 799.0,
-      "amount_paid": 799.0,
-      "pending_balance": 0,
-      "is_occupied": true,
-      "address": "nanachowk",
-      "payment_mode": "Online",
-      "receipt_path": "Receipt_sudeep_20260304_1772622660.pdf"
+      "student_name": "",
+      "mobile": "",
+      "exam_prep": "",
+      "start_date": "",
+      "end_date": "",
+      "total_amount": 0.0,
+      "amount_paid": 0.0,
+      "pending_balance": 0.0,
+      "is_occupied": false
     },
     "3": {
       "seat_number": 3,
-      "student_name": "Abubakar",
-      "mobile": "8085432932",
-      "exam_prep": "ssc",
-      "start_date": "2026-03-04",
-      "end_date": "2026-04-03",
-      "total_amount": 799.0,
-      "amount_paid": 500.0,
-      "pending_balance": 299.0,
-      "is_occupied": true,
-      "address": "nanachowk",
-      "payment_mode": "Online",
-      "receipt_path": "Receipt_Abubakar_20260304_1772622716.pdf"
+      "student_name": "",
+      "mobile": "",
+      "exam_prep": "",
+      "start_date": "",
+      "end_date": "",
+      "total_amount": 0.0,
+      "amount_paid": 0.0,
+      "pending_balance": 0.0,
+      "is_occupied": false
     },
     "4": {
       "seat_number": 4,
-      "student_name": "patil",
-      "mobile": "1112223333",
-      "exam_prep": "neet",
-      "start_date": "2026-02-04",
-      "end_date": "2026-03-07",
-      "total_amount": 1598.0,
-      "amount_paid": 1598.0,
-      "pending_balance": 0,
-      "is_occupied": true,
-      "address": "nanachowk",
-      "payment_mode": "Online",
-      "receipt_path": "Receipt_patil_20260304_1772623383.pdf"
+      "student_name": "",
+      "mobile": "",
+      "exam_prep": "",
+      "start_date": "",
+      "end_date": "",
+      "total_amount": 0.0,
+      "amount_paid": 0.0,
+      "pending_balance": 0.0,
+      "is_occupied": false
     },
     "5": {
       "seat_number": 5,
-      "student_name": "John Doe",
-      "mobile": "9381234662",
-      "exam_prep": "railway",
-      "start_date": "2026-02-04",
-      "end_date": "2026-06-04",
-      "total_amount": 2699.0,
-      "amount_paid": 2299.0,
-      "pending_balance": 400.0,
-      "is_occupied": true,
-      "address": "nanachowk",
-      "payment_mode": "Online",
-      "receipt_path": "Receipt_John_Doe_20260304_1772633901.pdf"
+      "student_name": "",
+      "mobile": "",
+      "exam_prep": "",
+      "start_date": "",
+      "end_date": "",
+      "total_amount": 0.0,
+      "amount_paid": 0.0,
+      "pending_balance": 0.0,
+      "is_occupied": false
     },
     "6": {
       "seat_number": 6,
@@ -1309,86 +1294,5 @@
       "receipt_path": "Receipt_ABUBAKAR_20260304_1772610082.pdf"
     }
   ],
-  "transactions": [
-    {
-      "date": "2026-03-04",
-      "type": "Registration",
-      "amount": 799.0,
-      "seat_number": 1,
-      "student_name": "Patil",
-      "timestamp": "2026-03-04T12:35:01.572213"
-    },
-    {
-      "date": "2026-03-04",
-      "type": "Registration",
-      "amount": 500.0,
-      "seat_number": 2,
-      "student_name": "ABUBAKAR",
-      "payment_mode": "Online",
-      "timestamp": "2026-03-04T13:11:22.705192"
-    },
-    {
-      "date": "2026-03-04",
-      "type": "Registration",
-      "amount": 1900.0,
-      "seat_number": 1,
-      "student_name": "Abubakar",
-      "payment_mode": "Online",
-      "timestamp": "2026-03-04T16:39:21.763515"
-    },
-    {
-      "date": "2026-03-04",
-      "type": "Registration",
-      "amount": 799.0,
-      "seat_number": 2,
-      "student_name": "sudeep",
-      "payment_mode": "Online",
-      "timestamp": "2026-03-04T16:41:00.543059"
-    },
-    {
-      "date": "2026-03-04",
-      "type": "Registration",
-      "amount": 500.0,
-      "seat_number": 3,
-      "student_name": "Abubakar",
-      "payment_mode": "Online",
-      "timestamp": "2026-03-04T16:41:56.893225"
-    },
-    {
-      "date": "2026-03-04",
-      "type": "Registration",
-      "amount": 799.0,
-      "seat_number": 4,
-      "student_name": "patil",
-      "payment_mode": "Online",
-      "timestamp": "2026-03-04T16:52:43.422343"
-    },
-    {
-      "date": "2026-03-04",
-      "type": "Renewal",
-      "amount": 799.0,
-      "seat_number": 4,
-      "student_name": "patil",
-      "payment_mode": "Online",
-      "timestamp": "2026-03-04T16:53:03.361108"
-    },
-    {
-      "date": "2026-03-04",
-      "type": "Registration",
-      "amount": 799.0,
-      "seat_number": 5,
-      "student_name": "John Doe",
-      "payment_mode": "Online",
-      "timestamp": "2026-03-04T17:08:21.398158"
-    },
-    {
-      "date": "2026-03-04",
-      "type": "Renewal",
-      "amount": 1500.0,
-      "seat_number": 5,
-      "student_name": "John Doe",
-      "payment_mode": "Online",
-      "timestamp": "2026-03-04T19:48:21.551879"
-    }
-  ]
+  "transactions": []
 }
