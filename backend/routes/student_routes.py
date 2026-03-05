@@ -1,8 +1,8 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, send_file
 from backend.services.google_sheets_api import GoogleSheetsAPI
 from backend.services.billing_logic import BillingLogic
 from backend.services.notification_gateway import NotificationGateway
-from backend.utils.pdf_generator import generate_receipt
+from backend.utils.pdf_generator import generate_receipt, generate_receipt_bytes
 from datetime import datetime
 import os
 
@@ -251,3 +251,49 @@ def get_student_history(seat_id):
         return jsonify({"success": True, "data": student_txns, "count": len(student_txns)})
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 400
+
+@bp.route('/<int:seat_id>/receipt', methods=['GET'])
+def download_receipt_ondemand(seat_id):
+    """Generate PDF receipt on-the-fly from Google Sheets — works on Vercel serverless."""
+    try:
+        seat = db.get_seat(seat_id)
+        if not seat or not seat.get('is_occupied'):
+            return jsonify({"success": False, "message": "Seat not found or vacant."}), 404
+
+        # Calculate plan days from start_date and end_date
+        try:
+            from datetime import datetime as dt
+            start = dt.strptime(seat['start_date'], '%Y-%m-%d')
+            end = dt.strptime(seat['end_date'], '%Y-%m-%d')
+            days = (end - start).days
+            plan_days = '90' if days >= 85 else '30'
+        except Exception:
+            plan_days = '30'
+
+        student_data = {
+            'student_name': seat.get('student_name', ''),
+            'mobile': seat.get('mobile', ''),
+            'address': seat.get('address', ''),
+            'exam_prep': seat.get('exam_prep', ''),
+            'seat_number': seat_id,
+            'start_date': seat.get('start_date', ''),
+            'end_date': seat.get('end_date', ''),
+            'total_amount': seat.get('total_amount', 0),
+            'amount_paid': seat.get('amount_paid', 0),
+            'pending_balance': seat.get('pending_balance', 0),
+            'payment_mode': seat.get('payment_mode', 'Offline'),
+            'days': plan_days,
+        }
+
+        pdf_buf = generate_receipt_bytes(student_data)
+        safe_name = str(seat.get('student_name', 'Receipt')).replace(' ', '_')
+        filename = f"Receipt_Seat{seat_id}_{safe_name}.pdf"
+
+        return send_file(
+            pdf_buf,
+            mimetype='application/pdf',
+            as_attachment=True,
+            download_name=filename
+        )
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500

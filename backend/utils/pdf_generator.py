@@ -189,3 +189,34 @@ def generate_receipt(student_data, target_directory):
     
     c.save()
     return filepath
+
+
+def generate_receipt_bytes(student_data):
+    """
+    Generates the same dual-copy receipt as a BytesIO object (no file written).
+    Use this on Vercel where /tmp is wiped between requests.
+    """
+    import io
+    from reportlab.pdfgen import canvas as rl_canvas
+
+    buf = io.BytesIO()
+    timestamp = int(time.time())
+    c = rl_canvas.Canvas(buf, pagesize=A4)
+    width, height = A4
+    half_height = height / 2.0
+
+    draw_receipt_copy(c, height, is_student_copy=True, student_data=student_data, timestamp=timestamp, width=width)
+
+    c.setStrokeColor(HexColor("#cbd5e1"))
+    c.setDash(6, 3)
+    c.line(0, half_height, width, half_height)
+    c.setFont("Helvetica", 10)
+    c.setFillColor(HexColor("#94a3b8"))
+    c.drawCentredString(width / 2, half_height - 3, "--------------------------------------------- Cut Here ---------------------------------------------")
+    c.setDash(1, 0)
+
+    draw_receipt_copy(c, half_height - 20, is_student_copy=False, student_data=student_data, timestamp=timestamp, width=width)
+
+    c.save()
+    buf.seek(0)
+    return buf
