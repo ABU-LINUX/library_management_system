@@ -1,179 +1,207 @@
-import json
 import os
+import json
+import gspread
+from google.oauth2.service_account import Credentials
 import threading
+from datetime import datetime
 
-class MockGoogleSheetsAPI:
+class GoogleSheetsAPI:
     """
-    A mock implementation of the Google Sheets API using a local JSON file,
-    so the system can be developed and tested without requiring an actual
-    Google Service Account immediately.
+    Live implementation of the Google Sheets API using gspread.
     
-    Sheet 1: Active Seats (81 Rows)
-    1. Seat Number (1-81)
-    2. Student Name
-    3. Mobile
-    4. Exam Preparation
-    5. Start Date
-    6. End Date
-    7. Total Amount
-    8. Amount Paid
-    9. Pending Balance
+    Sheet 1: Active_Seats
+    Sheet 2: Archived_Records
+    Sheet 3: Transactions
     """
     
-    def __init__(self, storage_file="mock_database.json"):
-        # get project root for initial seed
-        self.project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        self.seed_file = os.path.join(self.project_root, storage_file)
-        
-        # Force Vercel writable memory for database operations
-        self.storage_file = '/tmp/mock_database.json'
+    def __init__(self, spreadsheet_url="https://docs.google.com/spreadsheets/d/1RcK_Xd-fyEkTwGHWVvA1Lr2ukMspMp4utXBu4hHuHiI/edit"):
+        self.spreadsheet_url = spreadsheet_url
         self.lock = threading.Lock()
-        self._initialize_db()
+        self.client = self._authenticate()
+        self.sheet = self.client.open_by_url(self.spreadsheet_url)
+        self._initialize_sheets()
 
-    def _initialize_db(self):
-        with self.lock:
-            if not os.path.exists(self.storage_file):
-                # Try to load the initial seed from the project root
-                initial_data = {
-                    "active_seats": {},
-                    "archived_records": [],
-                    "transactions": []
-                }
-                
-                if os.path.exists(self.seed_file):
-                    try:
-                        with open(self.seed_file, 'r') as f:
-                            initial_data = json.load(f)
-                    except:
-                        pass
-                else:
-                    for i in range(1, 82):
-                        initial_data["active_seats"][str(i)] = {
-                            "seat_number": i,
-                            "student_name": "",
-                            "mobile": "",
-                            "exam_prep": "",
-                            "start_date": "",
-                            "end_date": "",
-                            "total_amount": 0.0,
-                            "amount_paid": 0.0,
-                            "pending_balance": 0.0,
-                            "is_occupied": False
-                        }
-                
-                # Write the combined/seeded data to the writable /tmp file
-                with open(self.storage_file, "w") as f:
-                    json.dump(initial_data, f, indent=2)
+    def _authenticate(self):
+        scopes = [
+            'https://www.googleapis.com/auth/spreadsheets',
+            'https://www.googleapis.com/auth/drive'
+        ]
+        
+        # Check if environment variable exists (For Vercel Production)
+        if 'GOOGLE_CREDENTIALS_JSON' in os.environ:
+            creds_dict = json.loads(os.environ['GOOGLE_CREDENTIALS_JSON'])
+            credentials = Credentials.from_service_account_info(creds_dict, scopes=scopes)
+        else:
+            # Fallback to local file
+            project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+            creds_file = os.path.join(project_root, 'config', 'credentials.json')
+            if not os.path.exists(creds_file):
+                raise FileNotFoundError(f"Missing Google Credentials at {creds_file} or GOOGLE_CREDENTIALS_JSON env var")
+            credentials = Credentials.from_service_account_file(creds_file, scopes=scopes)
+            
+        return gspread.authorize(credentials)
 
-    def _load(self):
+    def _get_or_create_worksheet(self, title, rows=1000, cols=20):
         try:
-            with open(self.storage_file, "r") as f:
-                return json.load(f)
-        except Exception as e:
-            return {"active_seats": {}, "archived_records": []}
+            return self.sheet.worksheet(title)
+        except gspread.exceptions.WorksheetNotFound:
+            return self.sheet.add_worksheet(title=title, rows=rows, cols=cols)
 
-    def _save(self, data):
-        with open(self.storage_file, "w") as f:
-            json.dump(data, f, indent=2)
+    def _initialize_sheets(self):
+        with self.lock:
+            # Active Seats Tab
+            self.active_ws = self._get_or_create_worksheet("Active_Seats", 100, 15)
+            # Ensure headers
+            headers = self.active_ws.row_values(1)
+            target_headers = ["seat_number", "student_name", "mobile", "exam_prep", "start_date", "end_date", "total_amount", "amount_paid", "pending_balance", "is_occupied", "payment_mode", "receipt_path"]
+            if not headers:
+                self.active_ws.append_row(target_headers)
+                
+                # Pre-fill 81 empty seats
+                empty_rows = []
+                for i in range(1, 82):
+                    empty_rows.append([i, "", "", "", "", "", 0.0, 0.0, 0.0, "FALSE", "", ""])
+                self.active_ws.append_rows(empty_rows)
+
+            # Archived Records Tab
+            self.archive_ws = self._get_or_create_worksheet("Archived_Records")
+            if not self.archive_ws.row_values(1):
+                self.archive_ws.append_row(target_headers + ["archived_at"])
+
+            # Transactions Tab
+            self.transactions_ws = self._get_or_create_worksheet("Transactions")
+            target_trans_headers = ["timestamp", "date", "type", "amount", "seat_number", "student_name", "payment_mode"]
+            if not self.transactions_ws.row_values(1):
+                self.transactions_ws.append_row(target_trans_headers)
+
+    def _row_to_dict(self, row, headers):
+        d = {}
+        for i, h in enumerate(headers):
+            val = row[i] if i < len(row) else ""
+            
+            # Cast known fields back to proper types
+            if h in ["total_amount", "amount_paid", "pending_balance", "amount"]:
+                try: d[h] = float(val) if val else 0.0
+                except: d[h] = 0.0
+            elif h in ["seat_number"]:
+                try: d[h] = int(val) if val else 0
+                except: d[h] = 0
+            elif h == "is_occupied":
+                d[h] = (str(val).upper() == "TRUE")
+            else:
+                d[h] = val
+        return d
+
+    def _dict_to_row(self, data_dict, headers):
+        return [str(data_dict.get(h, "")) for h in headers]
 
     def get_all_seats(self):
         with self.lock:
-            data = self._load()
-            # Return list of dicts, sorted by seat number
-            seats = list(data["active_seats"].values())
-            seats.sort(key=lambda x: int(x["seat_number"]))
+            records = self.active_ws.get_all_values()
+            if len(records) <= 1: return []
+            headers = records[0]
+            seats = []
+            for r in records[1:]:
+                if not r: continue
+                seats.append(self._row_to_dict(r, headers))
+            
+            # Sort by seat number
+            seats.sort(key=lambda x: x.get("seat_number", 0))
             return seats
 
     def get_seat(self, seat_number):
-        with self.lock:
-            data = self._load()
-            return data["active_seats"].get(str(seat_number))
+        seats = self.get_all_seats()
+        for s in seats:
+            if str(s.get("seat_number")) == str(seat_number):
+                return s
+        return None
 
     def update_seat(self, seat_number, student_data):
         with self.lock:
-            data = self._load()
-            seat_str = str(seat_number)
-            if seat_str in data["active_seats"]:
-                # Merge data
-                for key, value in student_data.items():
-                    data["active_seats"][seat_str][key] = value
+            records = self.active_ws.get_all_values()
+            if len(records) <= 1: return False
+            headers = records[0]
+            
+            row_index = -1
+            for idx, r in enumerate(records[1:], start=2):
+                if len(r) > 0 and str(r[0]) == str(seat_number):
+                    row_index = idx
+                    break
+                    
+            if row_index == -1: return False
+            
+            # Fetch current
+            current_row = records[row_index - 1]
+            current_dict = self._row_to_dict(current_row, headers)
+            
+            # Update with new
+            for k, v in student_data.items():
+                current_dict[k] = v
                 
-                # Auto-calculate pending balance if fee provided
-                if "total_amount" in data["active_seats"][seat_str] and "amount_paid" in data["active_seats"][seat_str]:
-                    try:
-                        tot = float(data["active_seats"][seat_str]["total_amount"])
-                        paid = float(data["active_seats"][seat_str]["amount_paid"])
-                        data["active_seats"][seat_str]["pending_balance"] = max(0, tot - paid)
-                    except:
-                        pass
+            # Calc balances
+            if "total_amount" in current_dict and "amount_paid" in current_dict:
+                try:
+                    tot = float(current_dict["total_amount"])
+                    paid = float(current_dict["amount_paid"])
+                    current_dict["pending_balance"] = max(0, tot - paid)
+                except: pass
                 
-                # Mark as occupied natively
-                data["active_seats"][seat_str]["is_occupied"] = True
-                
-                self._save(data)
-                return True
-            return False
+            current_dict["is_occupied"] = "TRUE"
+            
+            new_row = self._dict_to_row(current_dict, headers)
+            # Update cell range
+            range_name = f"A{row_index}:{gspread.utils.rowcol_to_a1(row_index, len(headers))}"
+            self.active_ws.update(values=[new_row], range_name=range_name)
+            return True
 
     def clear_seat(self, seat_number, archive=True):
         with self.lock:
-            data = self._load()
-            seat_str = str(seat_number)
-            if seat_str in data["active_seats"]:
-                seat_data = data["active_seats"][seat_str]
+            records = self.active_ws.get_all_values()
+            if len(records) <= 1: return False
+            headers = records[0]
+            
+            row_index = -1
+            for idx, r in enumerate(records[1:], start=2):
+                if len(r) > 0 and str(r[0]) == str(seat_number):
+                    row_index = idx
+                    break
+                    
+            if row_index == -1: return False
+            
+            current_row = records[row_index - 1]
+            current_dict = self._row_to_dict(current_row, headers)
+            
+            if archive and current_dict.get("is_occupied"):
+                archived_dict = current_dict.copy()
+                archived_dict["archived_at"] = datetime.now().isoformat()
+                archived_headers = self.archive_ws.row_values(1)
+                self.archive_ws.append_row(self._dict_to_row(archived_dict, archived_headers))
                 
-                if archive and seat_data.get("is_occupied"):
-                    # Move to archive
-                    data["archived_records"].append(seat_data.copy())
-                
-                # Reset seat
-                data["active_seats"][seat_str] = {
-                    "seat_number": int(seat_number),
-                    "student_name": "",
-                    "mobile": "",
-                    "exam_prep": "",
-                    "start_date": "",
-                    "end_date": "",
-                    "total_amount": 0.0,
-                    "amount_paid": 0.0,
-                    "pending_balance": 0.0,
-                    "is_occupied": False
-                }
-                
-                self._save(data)
-                return True
-            return False
+            # Clear seat row
+            empty_dict = {
+                "seat_number": int(seat_number),
+                "student_name": "", "mobile": "", "exam_prep": "",
+                "start_date": "", "end_date": "", 
+                "total_amount": 0.0, "amount_paid": 0.0, "pending_balance": 0.0,
+                "is_occupied": "FALSE", "payment_mode": "", "receipt_path": ""
+            }
+            new_row = self._dict_to_row(empty_dict, headers)
+            range_name = f"A{row_index}:{gspread.utils.rowcol_to_a1(row_index, len(headers))}"
+            self.active_ws.update(values=[new_row], range_name=range_name)
+            return True
 
     def add_transaction(self, transaction_data):
-        """
-        transaction_data should be a dict:
-        {
-            "date": "YYYY-MM-DD",
-            "type": "Registration" | "Renewal" | "Dues Clearance",
-            "amount": float,
-            "seat_number": int,
-            "student_name": str
-        }
-        """
         with self.lock:
-            data = self._load()
-            if "transactions" not in data:
-                data["transactions"] = []
-                
-            # Add a timestamp so we can sort properly
-            from datetime import datetime
             transaction_data["timestamp"] = datetime.now().isoformat()
-            
-            data["transactions"].append(transaction_data)
-            self._save(data)
+            headers = self.transactions_ws.row_values(1)
+            new_row = [str(transaction_data.get(h, "")) for h in headers]
+            self.transactions_ws.append_row(new_row)
             return True
             
     def get_transactions(self):
-        with self.lock:
-            data = self._load()
-            # Return list of transactions, newest first
-            transactions = data.get("transactions", [])
-            transactions.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
-            return transactions
-
-# Export as GoogleSheetsAPI for the rest of the application
-GoogleSheetsAPI = MockGoogleSheetsAPI
+        records = self.transactions_ws.get_all_values()
+        if len(records) <= 1: return []
+        headers = records[0]
+        transactions = [self._row_to_dict(r, headers) for r in records[1:] if r]
+        transactions.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
+        return transactions

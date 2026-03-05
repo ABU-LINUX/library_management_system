@@ -5,3 +5,4 @@ reportlab==4.0.7
 pytest==7.4.3
 requests==2.31.0
 twilio
+gspread\ngoogle-auth
