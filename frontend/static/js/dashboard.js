@@ -279,11 +279,22 @@ function openSeatModal(seatNumber) {
         title.innerText = `Student Profile - Seat ${seatNumber}`;
         body.innerHTML = `
             <div class="profile-card">
+                <!-- Highlighted header row -->
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; padding: 14px 16px; border-radius: 10px; background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid rgba(99,102,241,0.3);">
+                    <div>
+                        <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px;">Seat Number</div>
+                        <div style="font-size: 28px; font-weight: 800; color: #f8fafc; font-family: 'Inter', sans-serif;">🪑 ${seatNumber}</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px;">Subscription Plan</div>
+                        <span style="display: inline-block; padding: 6px 16px; border-radius: 999px; font-size: 14px; font-weight: 700; letter-spacing: 0.05em; background: ${planLabel === '90-Day Plan' ? 'linear-gradient(135deg, #6366f1, #4f46e5)' : 'linear-gradient(135deg, #10b981, #059669)'}; color: white; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">${planLabel}</span>
+                    </div>
+                </div>
+
                 <div class="profile-detail"><span class="detail-label">Name</span><span class="detail-value">${seat.student_name}</span></div>
                 <div class="profile-detail"><span class="detail-label">Mobile</span><span class="detail-value">${seat.mobile}</span></div>
                 <div class="profile-detail"><span class="detail-label">Address</span><span class="detail-value">${seat.address || 'N/A'}</span></div>
                 <div class="profile-detail"><span class="detail-label">Exam Prep</span><span class="detail-value">${seat.exam_prep || 'N/A'}</span></div>
-                <div class="profile-detail"><span class="detail-label">Plan</span><span class="detail-value" style="font-weight:700; color: var(--primary);">${planLabel}</span></div>
                 <div class="profile-detail"><span class="detail-label">Start Date</span><span class="detail-value">${seat.start_date}</span></div>
                 <div class="profile-detail"><span class="detail-label">End Date</span><span class="detail-value">${seat.end_date}</span></div>
                 <div class="profile-detail"><span class="detail-label">Total Fee</span><span class="detail-value">₹${seat.total_amount}</span></div>
