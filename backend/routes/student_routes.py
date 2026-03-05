@@ -79,6 +79,29 @@ def register_student():
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 400
 
+@bp.route('/<int:seat_id>/update', methods=['POST'])
+def update_student_details(seat_id):
+    """Safely updates only personal info. Financial/date fields are never touched."""
+    data = request.json
+    seat = db.get_seat(seat_id)
+    if not seat or not seat.get('is_occupied'):
+        return jsonify({"success": False, "message": "Seat is not occupied."}), 400
+    
+    allowed_fields = ['student_name', 'mobile', 'address', 'exam_prep']
+    update_payload = {k: v for k, v in data.items() if k in allowed_fields}
+    
+    if not update_payload:
+        return jsonify({"success": False, "message": "No valid fields to update."}), 400
+    
+    try:
+        success = db.update_seat(seat_id, update_payload)
+        if success:
+            return jsonify({"success": True, "message": "Student details updated."})
+        return jsonify({"success": False, "message": "Failed to update."}), 400
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 400
+
+
 @bp.route('/<int:seat_id>/renew', methods=['POST'])
 def renew_student(seat_id):
     data = request.json

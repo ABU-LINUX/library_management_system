@@ -308,6 +308,7 @@ function openSeatModal(seatNumber) {
             </div>
 
             <hr class="soft-divider">
+            <button class="btn-edit full-width" onclick="showEditDialog(${seatNumber})" style="background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; border: none; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; width: 100%; margin-bottom: 8px;">✏️ Edit Student Details</button>
             <button class="btn-danger full-width" onclick="showCancelDialog(${seatNumber})">Cancel Registration</button>
         `;
     }
@@ -555,6 +556,63 @@ function transferSeat(oldSeatId) {
         })
         .catch(err => showToast("Error transferring: " + err, "error"));
 }
+
+// ====== Edit Student Details ======
+function showEditDialog(seatNumber) {
+    const seat = cachedSeats.find(s => s.seat_number == seatNumber);
+    if (!seat) return;
+
+    document.getElementById('seatModal').style.display = 'none';
+    const editModal = document.getElementById('editModal');
+    document.getElementById('edit_seat_number').value = seatNumber;
+    document.getElementById('edit_name').value = seat.student_name || '';
+    document.getElementById('edit_mobile').value = seat.mobile || '';
+    document.getElementById('edit_address').value = seat.address || '';
+
+    // Pre-check exam prep checkboxes
+    const existingPreps = (seat.exam_prep || '').split(',').map(s => s.trim().toLowerCase());
+    document.querySelectorAll('input[name="edit_exam_prep"]').forEach(cb => {
+        cb.checked = existingPreps.includes(cb.value.toLowerCase());
+    });
+
+    editModal.style.display = 'block';
+}
+
+function closeEditDialog() {
+    document.getElementById('editModal').style.display = 'none';
+    document.getElementById('seatModal').style.display = 'block';
+}
+
+function submitEditProfile() {
+    const seatNumber = document.getElementById('edit_seat_number').value;
+    const name = document.getElementById('edit_name').value.trim();
+    const mobile = document.getElementById('edit_mobile').value.trim();
+    const address = document.getElementById('edit_address').value.trim();
+    const checkedExams = Array.from(document.querySelectorAll('input[name="edit_exam_prep"]:checked'))
+        .map(cb => cb.value).join(', ');
+
+    if (!name) { showToast('Name cannot be empty.', 'error'); return; }
+    if (!/^[0-9]{10}$/.test(mobile)) { showToast('Please enter a valid 10-digit mobile number.', 'error'); return; }
+    if (!address) { showToast('Address cannot be empty.', 'error'); return; }
+
+    fetch(`/api/students/${seatNumber}/update`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ student_name: name, mobile: mobile, address: address, exam_prep: checkedExams })
+    })
+        .then(r => r.json())
+        .then(res => {
+            if (res.success) {
+                document.getElementById('editModal').style.display = 'none';
+                fetchDashboardData();
+                showToast('Student details updated successfully!', 'success');
+            } else {
+                showToast(res.message || 'Update failed.', 'error');
+            }
+        })
+        .catch(err => showToast('Error: ' + err, 'error'));
+}
+
 
 function confirmCancel() {
     const seatNumber = document.getElementById('cancel_seat_number').value;
