@@ -291,12 +291,16 @@ function openSeatModal(seatNumber) {
                     </div>
                 </div>
 
-                <!-- Student Name Highlight — solid amber, always visible -->
-                <div style="padding: 14px 16px; border-radius: 10px; background: #d97706; text-align: center; margin-bottom: 12px;">
-                    <div style="font-size: 10px; color: #fef3c7; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px;">👤 Student Name</div>
-                    <div style="font-size: 20px; font-weight: 800; color: #ffffff; font-family: 'Inter', sans-serif;">${seat.student_name}</div>
+                <!-- Premium Student Name Card -->
+                <div style="padding: 24px 20px; border-radius: 14px; background: linear-gradient(135deg, #1e1b4b 0%, #3730a3 50%, #6d28d9 100%); text-align: center; margin-bottom: 14px; box-shadow: 0 6px 24px rgba(99,102,241,0.35);">
+                    <!-- Avatar circle with initials -->
+                    <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.45); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 22px; font-weight: 800; color: #ffffff; text-transform: uppercase; font-family: 'Inter', sans-serif; backdrop-filter: blur(4px);">
+                        ${seat.student_name.trim().split(' ').map(w => w[0]).slice(0, 2).join('')}
+                    </div>
+                    <div style="font-size: 11px; color: #c4b5fd; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 6px;">Student</div>
+                    <div style="font-size: 22px; font-weight: 800; color: #ffffff; font-family: 'Inter', sans-serif; line-height: 1.2; margin-bottom: 8px;">${seat.student_name}</div>
+                    <div style="font-size: 13px; color: #ddd6fe;">📞 ${seat.mobile}</div>
                 </div>
-                <div class="profile-detail"><span class="detail-label">Mobile</span><span class="detail-value">${seat.mobile}</span></div>
                 <div class="profile-detail"><span class="detail-label">Address</span><span class="detail-value">${seat.address || 'N/A'}</span></div>
                 <div class="profile-detail"><span class="detail-label">Exam Prep</span><span class="detail-value">${seat.exam_prep || 'N/A'}</span></div>
                 <!-- Start / End Date — solid colours, side by side -->
