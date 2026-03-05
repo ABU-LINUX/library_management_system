@@ -134,14 +134,39 @@ function renderDashboard(seats) {
                 }
 
                 if (needsAction) {
-                    // Add to today's action list
-                    const warningText = (diffDays <= 3) ? `(Exp: ${seat.end_date})` : `(Due: ₹${seat.pending_balance})`;
-                    const li = document.createElement('li');
-                    li.innerHTML = `
-                        <span>Seat ${seat.seat_number}: ${seat.student_name} <strong style="color:var(--pending)">${warningText}</strong></span>
-                        <button class="btn-secondary" style="padding: 6px 14px; font-size: 13px;" onclick="openSeatModal(${seat.seat_number})">Manage</button>
-                    `;
-                    actionList.appendChild(li);
+                    const isExpiring = diffDays <= 3;
+                    const hasDues = parseFloat(seat.pending_balance) > 0;
+
+                    // Expiring alert card
+                    if (isExpiring) {
+                        const li = document.createElement('li');
+                        li.style.cssText = 'background:#fff; border-radius:8px; border-left:4px solid #f59e0b; padding:10px 12px; box-shadow:0 1px 4px rgba(0,0,0,0.07);';
+                        li.innerHTML = `
+                            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:5px;">
+                                <span style="background:#fef3c7; color:#92400e; font-size:11px; font-weight:700; padding:2px 7px; border-radius:99px;">Seat ${seat.seat_number}</span>
+                                <span style="font-size:10px; color:#f59e0b; font-weight:600;">⏰ ${diffDays === 0 ? 'TODAY' : diffDays < 0 ? 'EXPIRED' : 'EXP IN ' + diffDays + 'd'}</span>
+                            </div>
+                            <div style="font-size:12px; font-weight:600; color:#1e293b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:6px;">${seat.student_name}</div>
+                            <button onclick="openSeatModal(${seat.seat_number})" style="width:100%; padding:5px 0; font-size:12px; font-weight:600; background:#f59e0b; color:#fff; border:none; border-radius:6px; cursor:pointer;">Manage →</button>
+                        `;
+                        actionList.appendChild(li);
+                    }
+
+                    // Dues alert card
+                    if (hasDues) {
+                        const li = document.createElement('li');
+                        li.style.cssText = 'background:#fff; border-radius:8px; border-left:4px solid #ef4444; padding:10px 12px; box-shadow:0 1px 4px rgba(0,0,0,0.07);';
+                        li.innerHTML = `
+                            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:5px;">
+                                <span style="background:#fee2e2; color:#991b1b; font-size:11px; font-weight:700; padding:2px 7px; border-radius:99px;">Seat ${seat.seat_number}</span>
+                                <span style="font-size:10px; color:#ef4444; font-weight:600;">💸 DUES</span>
+                            </div>
+                            <div style="font-size:12px; font-weight:600; color:#1e293b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:4px;">${seat.student_name}</div>
+                            <div style="font-size:11px; color:#ef4444; font-weight:700; margin-bottom:6px;">₹${seat.pending_balance} pending</div>
+                            <button onclick="openSeatModal(${seat.seat_number})" style="width:100%; padding:5px 0; font-size:12px; font-weight:600; background:#ef4444; color:#fff; border:none; border-radius:6px; cursor:pointer;">Clear Dues →</button>
+                        `;
+                        actionList.appendChild(li);
+                    }
                 }
             } else {
                 statusClass = 'red';
@@ -157,6 +182,11 @@ function renderDashboard(seats) {
         div.onclick = () => openSeatModal(seat.seat_number);
         grid.appendChild(div);
     });
+
+    // Show "All clear" if no alert items
+    if (actionList.children.length === 0) {
+        actionList.innerHTML = `<li style="text-align:center; padding:18px 8px; color:#059669; font-size:13px; font-weight:600;">✅ All clear!<br><span style="font-weight:400; color:#6b7280; font-size:12px;">No expirations or pending dues.</span></li>`;
+    }
 
     // Update Top Metrics
     document.getElementById('total_students').innerText = totalStudents;
