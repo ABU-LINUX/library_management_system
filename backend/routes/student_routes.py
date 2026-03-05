@@ -67,7 +67,7 @@ def register_student():
         if success:
             if float(student_data['amount_paid']) > 0:
                 db.add_transaction({
-                    "date": datetime.now().strftime("%Y-%m-%d"),
+                    "date": student_data.get('start_date', datetime.now().strftime("%Y-%m-%d")),
                     "type": "Registration",
                     "amount": float(student_data['amount_paid']),
                     "seat_number": seat_number,
@@ -117,7 +117,7 @@ def renew_student(seat_id):
         if success:
             if additional_paid > 0:
                 db.add_transaction({
-                    "date": datetime.now().strftime("%Y-%m-%d"),
+                    "date": data.get('start_date', datetime.now().strftime("%Y-%m-%d")),
                     "type": "Renewal",
                     "amount": additional_paid,
                     "seat_number": seat_id,
@@ -187,16 +187,14 @@ def pay_dues(seat_id):
         # Generate new receipt reflecting payment
         seat['is_dues_clearance'] = True
         seat['current_payment'] = amount
-        project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        receipt_dir = os.path.join(project_root, 'receipts')
-        filepath = generate_receipt(seat, receipt_dir)
+        filepath = generate_receipt(seat, '/tmp/receipts')
         
         updated_data['receipt_path'] = os.path.basename(filepath)
         
         success = db.update_seat(seat_id, updated_data)
         if success:
             db.add_transaction({
-                "date": datetime.now().strftime("%Y-%m-%d"),
+                "date": data.get('date', datetime.now().strftime("%Y-%m-%d")),
                 "type": "Dues Clearance",
                 "amount": float(amount),
                 "seat_number": seat_id,

@@ -459,17 +459,21 @@ function confirmRenew() {
     const amountPaid = document.getElementById('renew_amount_paid').value;
     const paymentMode = document.getElementById('renew_payment_mode').value;
     const duration = document.getElementById('renew_duration').value;
-    const totalAdded = duration === '90' ? 1900 : 799;
+    const totalAdded = duration === '90' ? 1900 : 700;
+    const renewDate = document.getElementById('renew_date').value;
+
+    const payload = {
+        days: parseInt(duration),
+        add_total_amount: totalAdded,
+        add_amount_paid: amountPaid || 0,
+        payment_mode: paymentMode
+    };
+    if (renewDate) payload.start_date = renewDate;
 
     fetch(`/api/students/${seatNumber}/renew`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            days: parseInt(duration),
-            add_total_amount: totalAdded,
-            add_amount_paid: amountPaid || 0,
-            payment_mode: paymentMode
-        })
+        body: JSON.stringify(payload)
     })
         .then(r => r.json())
         .then(res => {
@@ -500,16 +504,20 @@ function confirmPayDues() {
     const seatNumber = document.getElementById('pay_dues_seat_number').value;
     const amount = document.getElementById('pay_dues_amount').value;
     const paymentMode = document.getElementById('pay_dues_payment_mode').value;
+    const payDuesDate = document.getElementById('pay_dues_date').value;
 
     if (!amount || isNaN(amount) || amount <= 0) {
         showToast("Please enter a valid amount.", "error");
         return;
     }
 
+    const payload = { amount: parseFloat(amount), payment_mode: paymentMode };
+    if (payDuesDate) payload.date = payDuesDate;
+
     fetch(`/api/students/${seatNumber}/pay_dues`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: parseFloat(amount), payment_mode: paymentMode })
+        body: JSON.stringify(payload)
     })
         .then(r => r.json())
         .then(res => {
