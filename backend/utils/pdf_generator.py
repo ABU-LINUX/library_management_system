@@ -147,17 +147,21 @@ def draw_receipt_copy(c, start_y, is_student_copy, student_data, timestamp, widt
 def generate_receipt(student_data, target_directory):
     """
     Generates a professional dual-copy A4 PDF receipt.
+    In Vercel serverless, this is forced to write to /tmp/receipts.
     """
-    if not os.path.exists(target_directory):
-        os.makedirs(target_directory)
+    # Force use of Vercel's writable /tmp directory
+    safe_target_directory = '/tmp/receipts'
+    
+    if not os.path.exists(safe_target_directory):
+        os.makedirs(safe_target_directory, exist_ok=True)
         
-    safe_name = student_data.get('student_name', 'Student').replace(" ", "_")
+    safe_name = student_data.get('student_name', 'Student').replace(" ", "_").replace("/", "-")
     timestamp = int(time.time())
     
     # Adding a date string to the filename as well for clarity
     date_str = datetime.now().strftime("%Y%m%d")
     filename = f"Receipt_{safe_name}_{date_str}_{timestamp}.pdf"
-    filepath = os.path.join(target_directory, filename)
+    filepath = os.path.join(safe_target_directory, filename)
     
     c = canvas.Canvas(filepath, pagesize=A4)
     width, height = A4

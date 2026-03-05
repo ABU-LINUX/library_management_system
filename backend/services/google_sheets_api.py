@@ -21,35 +21,49 @@ class MockGoogleSheetsAPI:
     """
     
     def __init__(self, storage_file="mock_database.json"):
-        # get project root
-        project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        self.storage_file = os.path.join(project_root, storage_file)
+        # get project root for initial seed
+        self.project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        self.seed_file = os.path.join(self.project_root, storage_file)
+        
+        # Force Vercel writable memory for database operations
+        self.storage_file = '/tmp/mock_database.json'
         self.lock = threading.Lock()
         self._initialize_db()
 
     def _initialize_db(self):
         with self.lock:
             if not os.path.exists(self.storage_file):
-                # Initialize 81 vacant seats
+                # Try to load the initial seed from the project root
                 initial_data = {
                     "active_seats": {},
                     "archived_records": [],
                     "transactions": []
                 }
-                for i in range(1, 82):
-                    initial_data["active_seats"][str(i)] = {
-                        "seat_number": i,
-                        "student_name": "",
-                        "mobile": "",
-                        "exam_prep": "",
-                        "start_date": "",
-                        "end_date": "",
-                        "total_amount": 0.0,
-                        "amount_paid": 0.0,
-                        "pending_balance": 0.0,
-                        "is_occupied": False
-                    }
-                self._save(initial_data)
+                
+                if os.path.exists(self.seed_file):
+                    try:
+                        with open(self.seed_file, 'r') as f:
+                            initial_data = json.load(f)
+                    except:
+                        pass
+                else:
+                    for i in range(1, 82):
+                        initial_data["active_seats"][str(i)] = {
+                            "seat_number": i,
+                            "student_name": "",
+                            "mobile": "",
+                            "exam_prep": "",
+                            "start_date": "",
+                            "end_date": "",
+                            "total_amount": 0.0,
+                            "amount_paid": 0.0,
+                            "pending_balance": 0.0,
+                            "is_occupied": False
+                        }
+                
+                # Write the combined/seeded data to the writable /tmp file
+                with open(self.storage_file, "w") as f:
+                    json.dump(initial_data, f, indent=2)
 
     def _load(self):
         try:

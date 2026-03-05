@@ -55,13 +55,10 @@ def register_student():
         )
 
         # Generate Receipt
-        project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        receipt_dir = os.path.join(project_root, 'receipts')
-        
         # Temp assign for receipt gen
         temp_seat = student_data.copy()
         temp_seat['seat_number'] = seat_number
-        filepath = generate_receipt(temp_seat, receipt_dir)
+        filepath = generate_receipt(temp_seat, '/tmp/receipts')
         
         # Save relative path to DB
         student_data['receipt_path'] = os.path.basename(filepath)
@@ -111,9 +108,7 @@ def renew_student(seat_id):
         seat.update(updated_data)
         
         # Generate Receipt
-        project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        receipt_dir = os.path.join(project_root, 'receipts')
-        filepath = generate_receipt(seat, receipt_dir)
+        filepath = generate_receipt(seat, '/tmp/receipts')
         
         # Save exact path reference for JS
         updated_data['receipt_path'] = os.path.basename(filepath)
