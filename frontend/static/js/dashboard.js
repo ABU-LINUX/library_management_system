@@ -291,7 +291,11 @@ function openSeatModal(seatNumber) {
                     </div>
                 </div>
 
-                <div class="profile-detail"><span class="detail-label">Name</span><span class="detail-value">${seat.student_name}</span></div>
+                <!-- Student Name Highlight -->
+                <div style="padding: 14px 16px; border-radius: 10px; background: linear-gradient(135deg, rgba(251,191,36,0.15), rgba(245,158,11,0.08)); border: 1px solid rgba(251,191,36,0.4); text-align: center; margin-bottom: 10px;">
+                    <div style="font-size: 10px; color: #fcd34d; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px;">👤 Student Name</div>
+                    <div style="font-size: 20px; font-weight: 800; color: #fbbf24; font-family: 'Inter', sans-serif;">${seat.student_name}</div>
+                </div>
                 <div class="profile-detail"><span class="detail-label">Mobile</span><span class="detail-value">${seat.mobile}</span></div>
                 <div class="profile-detail"><span class="detail-label">Address</span><span class="detail-value">${seat.address || 'N/A'}</span></div>
                 <div class="profile-detail"><span class="detail-label">Exam Prep</span><span class="detail-value">${seat.exam_prep || 'N/A'}</span></div>
