@@ -248,21 +248,21 @@ function openSeatModal(seatNumber) {
     if (!seat.is_occupied) {
         title.innerText = `New Registration - Seat ${seatNumber}`;
         body.innerHTML = `
-                    <form id="registerForm" class="modern-form">
+                    <form id="registerForm" class="modern-form" autocomplete="on">
                         <div id="form_error" style="display: none; color: #ef4444; background: #fee2e2; border: 1px solid #fca5a5; padding: 10px; border-radius: 6px; font-size: 14px; text-align: center; font-weight: 600;"></div>
                         <input type="hidden" id="seat_number" value="${seatNumber}">
                         
                         <div class="form-row">
-                            <div class="form-group"><label>Name</label><input type="text" id="name" placeholder="E.g. Rahul Kumar" required></div>
-                            <div class="form-group"><label>Mobile</label><input type="text" id="mobile" placeholder="10 digits only" required></div>
+                            <div class="form-group"><label>Name</label><input type="text" id="name" name="name" placeholder="E.g. Rahul Kumar" autocomplete="name" tabindex="1" required></div>
+                            <div class="form-group"><label>Mobile</label><input type="tel" id="mobile" name="mobile" placeholder="10 digits only" autocomplete="tel" tabindex="2" required></div>
                         </div>
                         
-                        <div class="form-group"><label>Address</label><input type="text" id="address" placeholder="Enter full address" required></div>
+                        <div class="form-group"><label>Address</label><input type="text" id="address" name="address" placeholder="Enter full address" autocomplete="street-address" tabindex="3" required></div>
                         
                         <div class="form-group">
                             <label>Exam Prep</label>
                             <div id="exam_prep_checkboxes" class="exam-prep-chips">
-                                <label><input type="checkbox" name="exam_prep" value="iit-jee"> IIT-JEE</label>
+                                <label tabindex="4"><input type="checkbox" name="exam_prep" value="iit-jee"> IIT-JEE</label>
                                 <label><input type="checkbox" name="exam_prep" value="neet"> NEET</label>
                                 <label><input type="checkbox" name="exam_prep" value="ssc"> SSC</label>
                                 <label><input type="checkbox" name="exam_prep" value="railway"> Railway</label>
@@ -275,11 +275,11 @@ function openSeatModal(seatNumber) {
                         <div class="form-row">
                             <div class="form-group">
                                 <label>Start Date</label>
-                                <input type="date" id="start_date" min="2026-01-01" max="${new Date().toISOString().split('T')[0]}" placeholder="Leave empty for today">
+                                <input type="date" id="start_date" name="start_date" min="2026-01-01" max="${new Date().toISOString().split('T')[0]}" autocomplete="off" tabindex="5">
                             </div>
                             <div class="form-group">
                                 <label>Duration</label>
-                                <select id="duration" onchange="document.getElementById('total_amount').value = (this.value == '90') ? 1900 : 700">
+                                <select id="duration" name="duration" tabindex="6" onchange="document.getElementById('total_amount').value = (this.value == '90') ? 1900 : 700">
                                     <option value="30">30 Days</option>
                                     <option value="90">90 Days</option>
                                 </select>
@@ -287,8 +287,8 @@ function openSeatModal(seatNumber) {
                         </div>
                         
                         <div class="form-row">
-                            <div class="form-group"><label>Total Fee (₹)</label><input type="number" id="total_amount" value="700" required></div>
-                            <div class="form-group"><label>Amount Paid (₹)</label><input type="number" id="amount_paid" value="" required></div>
+                            <div class="form-group"><label>Total Fee (₹)</label><input type="number" id="total_amount" name="total_amount" value="700" autocomplete="off" tabindex="7" required></div>
+                            <div class="form-group"><label>Amount Paid (₹)</label><input type="number" id="amount_paid" name="amount_paid" value="" autocomplete="off" tabindex="8" required></div>
                         </div>
                         
                         <div class="form-group">
