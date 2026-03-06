@@ -83,7 +83,7 @@ def register_student():
 
 @bp.route('/<int:seat_id>/update', methods=['POST'])
 def update_student_details(seat_id):
-    """Safely updates only personal info. Financial/date fields are never touched."""
+    """Safely updates personal info and modifies active billing period/plan."""
     data = request.json
     seat = db.get_seat(seat_id)
     if not seat or not seat.get('is_occupied'):
@@ -92,6 +92,35 @@ def update_student_details(seat_id):
     allowed_fields = ['student_name', 'mobile', 'address', 'exam_prep']
     update_payload = {k: v for k, v in data.items() if k in allowed_fields}
     
+    new_start = data.get('start_date')
+    new_plan_str = data.get('plan_days')
+    
+    # Process financial / date adjustments if changed
+    if new_start or new_plan_str:
+        current_start = new_start if new_start else seat.get('start_date')
+        
+        # Determine plan duration
+        if new_plan_str:
+            plan_days = int(new_plan_str)
+        else:
+            plan_days = 90 if float(seat.get('total_amount', 700)) >= 1900 else 30
+            
+        update_payload['start_date'] = current_start
+        
+        from backend.services.billing_logic import BillingLogic
+        new_end = BillingLogic.calculate_end_date(current_start, plan_days)
+        if new_end:
+            update_payload['end_date'] = new_end
+            
+        if new_plan_str:
+            # If admin changed the plan from 30 to 90 or vice versa
+            new_total = 1900.0 if plan_days >= 90 else 700.0
+            paid = float(seat.get('amount_paid', 0))
+            pending = max(0.0, new_total - paid)
+            
+            update_payload['total_amount'] = new_total
+            update_payload['pending_balance'] = pending
+
     if not update_payload:
         return jsonify({"success": False, "message": "No valid fields to update."}), 400
     

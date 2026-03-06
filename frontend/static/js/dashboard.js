@@ -405,7 +405,6 @@ function openSeatModal(seatNumber) {
                 return '<button class="btn-primary full-width" onclick="showRenewDialog(' + seatNumber + ')">Renew Subscription</button>';
             })()}
                 <button class="btn-pending full-width" onclick="downloadLastReceipt(${seatNumber})">Download Receipt</button>
-                <button class="btn-warning full-width" style="padding:10px; font-size:13px; font-weight:600; border:none; border-radius:8px; cursor:pointer; background:linear-gradient(135deg,#7c3aed,#6d28d9); color:#fff;" onclick="showChangePlanDialog(${seatNumber})">🔄 Change Plan</button>
             </div>
             
             ${parseFloat(seat.pending_balance) > 0 ? `
@@ -807,6 +806,8 @@ function showEditDialog(seatNumber) {
     document.getElementById('edit_name').value = seat.student_name || '';
     document.getElementById('edit_mobile').value = seat.mobile || '';
     document.getElementById('edit_address').value = seat.address || '';
+    document.getElementById('edit_start_date').value = seat.start_date || '';
+    document.getElementById('edit_plan').value = (seat.total_amount && parseFloat(seat.total_amount) >= 1900) ? '90' : '30';
 
     // Pre-check exam prep checkboxes
     const existingPreps = (seat.exam_prep || '').split(',').map(s => s.trim().toLowerCase());
@@ -827,17 +828,29 @@ function submitEditProfile() {
     const name = document.getElementById('edit_name').value.trim();
     const mobile = document.getElementById('edit_mobile').value.trim();
     const address = document.getElementById('edit_address').value.trim();
+    const startDate = document.getElementById('edit_start_date').value;
+    const plan = document.getElementById('edit_plan').value;
     const checkedExams = Array.from(document.querySelectorAll('input[name="edit_exam_prep"]:checked'))
         .map(cb => cb.value).join(', ');
 
     if (!name) { showToast('Name cannot be empty.', 'error'); return; }
     if (!/^[0-9]{10}$/.test(mobile)) { showToast('Please enter a valid 10-digit mobile number.', 'error'); return; }
     if (!address) { showToast('Address cannot be empty.', 'error'); return; }
+    if (!startDate) { showToast('Start Date cannot be empty.', 'error'); return; }
+
+    const payload = {
+        student_name: name,
+        mobile: mobile,
+        address: address,
+        exam_prep: checkedExams,
+        start_date: startDate,
+        plan_days: parseInt(plan)
+    };
 
     fetch(`/api/students/${seatNumber}/update`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ student_name: name, mobile: mobile, address: address, exam_prep: checkedExams })
+        body: JSON.stringify(payload)
     })
         .then(r => r.json())
         .then(res => {

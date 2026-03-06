@@ -133,13 +133,26 @@
         </div>
     </div>
 
-    <!-- Modal for Edit Student Details -->
     <div id="editModal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeEditDialog()">&times;</span>
             <h2>Edit Student Details</h2>
-            <p style="color: var(--text-secondary); margin-bottom: 20px; font-size: 14px;">Only personal information can be edited. Financial data is preserved.</p>
+            <p style="color: var(--text-secondary); margin-bottom: 20px; font-size: 14px;">Update personal info, adjust the start date or change the billing plan without creating a new transaction.</p>
             <input type="hidden" id="edit_seat_number">
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div class="form-group">
+                    <label>Start Date</label>
+                    <input type="date" id="edit_start_date" required>
+                </div>
+                <div class="form-group">
+                    <label>Plan</label>
+                    <select id="edit_plan">
+                        <option value="30">30 Days (₹700)</option>
+                        <option value="90">90 Days (₹1900)</option>
+                    </select>
+                </div>
+            </div>
 
             <div class="form-group">
                 <label>Full Name</label>
