@@ -164,36 +164,8 @@ class GoogleSheetsAPI:
             # Update cell range
             range_name = f"A{row_index}:{gspread.utils.rowcol_to_a1(row_index, len(headers))}"
             self.active_ws.update(values=[new_row], range_name=range_name)
-
-            if is_new_registration:
-                self.add_transaction({
-                    "date": student_data.get('start_date', datetime.now().strftime("%Y-%m-%d")),
-                    "type": "Registration",
-                    "amount": float(student_data['amount_paid']),
-                    "seat_number": seat_number,
-                    "student_name": student_data['student_name'],
-                    "payment_mode": student_data.get('payment_mode', 'Offline'),
-                    "start_date": student_data.get('start_date', ''),
-                    "end_date": student_data.get('end_date', ''),
-                })
-            else: # This is a renewal
-                # Calculate additional paid amount if any
-                old_amount_paid = float(records[row_index - 1][headers.index("amount_paid")])
-                new_amount_paid = float(student_data.get("amount_paid", old_amount_paid))
-                additional_paid = new_amount_paid - old_amount_paid
-
-                if additional_paid > 0:
-                    self.add_transaction({
-                        "date": datetime.now().strftime("%Y-%m-%d"),
-                        "type": "Renewal",
-                        "amount": additional_paid,
-                        "seat_number": seat_number,
-                        "student_name": student_data.get('student_name', current_dict.get('student_name', '')),
-                        "payment_mode": student_data.get('payment_mode', current_dict.get('payment_mode', 'Offline')),
-                        "start_date": current_dict.get('start_date', ''), # Use current start_date
-                        "end_date": student_data.get('end_date', current_dict.get('end_date', '')), # Use new end_date
-                    })
             return True
+
 
     def clear_seat(self, seat_number, archive=True):
         with self.lock:

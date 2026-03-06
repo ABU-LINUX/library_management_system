@@ -163,14 +163,19 @@ def renew_student(seat_id):
         additional_total = float(data.get('add_total_amount', 700))
         additional_paid = float(data.get('add_amount_paid', 700))
         
-        # Updates
-        new_end_date = BillingLogic.calculate_end_date(seat['end_date'], days_to_add)
+        # New subscription period:
+        # start_date = renewal transaction date (from form or today)
+        # end_date   = start_date + plan days
+        renewal_start = data.get('start_date', datetime.now().strftime("%Y-%m-%d"))
+        new_end_date = BillingLogic.calculate_end_date(renewal_start, days_to_add)
+        
         new_total = float(seat['total_amount']) + additional_total
         new_paid = float(seat['amount_paid']) + additional_paid
         pending = BillingLogic.calculate_pending_balance(new_total, new_paid)
         
         updated_data = {
-            "end_date": new_end_date,
+            "start_date": renewal_start,        # ← new period starts today
+            "end_date": new_end_date,           # ← new period ends start + days
             "total_amount": new_total,
             "amount_paid": new_paid,
             "pending_balance": pending,
@@ -189,14 +194,14 @@ def renew_student(seat_id):
         if success:
             if additional_paid > 0:
                 db.add_transaction({
-                    "date": data.get('start_date', datetime.now().strftime("%Y-%m-%d")),
+                    "date": renewal_start,
                     "type": "Renewal",
                     "amount": additional_paid,
                     "seat_number": seat_id,
                     "student_name": seat.get('student_name', ''),
                     "payment_mode": updated_data.get('payment_mode', 'Offline'),
-                    "start_date": seat.get('end_date', ''),
-                    "end_date": new_end_date,
+                    "start_date": renewal_start,   # new period start
+                    "end_date": new_end_date,       # new period end
                 })
             return jsonify({"success": True, "message": "Renewed successfully.", "receipt_path": updated_data['receipt_path']})
             
