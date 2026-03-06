@@ -301,11 +301,30 @@ def get_student_history(seat_id):
     """Return all transactions for a specific seat number."""
     try:
         all_transactions = db.get_transactions()
+        seat = db.get_seat(seat_id)
+
         student_txns = [
             t for t in all_transactions
             if str(t.get('seat_number', '')).strip() == str(seat_id)
         ]
         student_txns.sort(key=lambda x: x.get('date', ''), reverse=False)
+
+        # Fill in missing start_date / end_date for old transactions
+        # (saved before these columns existed in Google Sheets)
+        if seat:
+            seat_start = seat.get('start_date', '')
+            seat_end = seat.get('end_date', '')
+            for t in student_txns:
+                if not t.get('start_date'):
+                    # Registration/Renewal: start = transaction date
+                    # Dues Clearance: start = seat's current subscription start
+                    if t.get('type') in ('Registration', 'Renewal'):
+                        t['start_date'] = t.get('date', seat_start)
+                    else:
+                        t['start_date'] = seat_start
+                if not t.get('end_date'):
+                    t['end_date'] = seat_end
+
         return jsonify({"success": True, "data": student_txns, "count": len(student_txns)})
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 400
