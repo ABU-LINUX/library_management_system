@@ -101,9 +101,20 @@ function renderDashboard(seats) {
     today.setHours(0, 0, 0, 0);
 
     seats.forEach(seat => {
+        const isOccupied = seat.is_occupied;
+        const shortName = isOccupied && seat.student_name
+            ? seat.student_name.split(' ')[0].substring(0, 8)
+            : '';
+
         const div = document.createElement('div');
         div.className = 'seat';
-        div.innerText = seat.seat_number;
+        div.innerHTML = `
+            <span style="font-size:18px; line-height:1; margin-bottom:1px;">🪑</span>
+            <span style="font-size:13px; font-weight:800; letter-spacing:-0.02em; line-height:1;">${seat.seat_number}</span>
+            <span style="font-size:9px; font-weight:500; opacity:0.75; letter-spacing:0.02em; max-width:58px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; line-height:1.2;">
+                ${isOccupied ? shortName : 'Vacant'}
+            </span>
+        `;
 
         let statusClass = 'green'; // Vacant
         let needsAction = false;
