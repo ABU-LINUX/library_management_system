@@ -204,12 +204,11 @@ class GoogleSheetsAPI:
             return True
 
     def add_transaction(self, transaction_data):
-        with self.lock:
-            transaction_data["timestamp"] = datetime.now().isoformat()
-            headers = self.transactions_ws.row_values(1)
-            new_row = [str(transaction_data.get(h, "")) for h in headers]
-            self.transactions_ws.append_row(new_row)
-            return True
+        transaction_data["timestamp"] = datetime.now().isoformat()
+        headers = self.transactions_ws.row_values(1)
+        new_row = [str(transaction_data.get(h, "")) for h in headers]
+        self.transactions_ws.append_row(new_row)
+        return True
             
     def get_transactions(self):
         records = self.transactions_ws.get_all_values()
