@@ -104,7 +104,7 @@ def update_student_details(seat_id):
 
 @bp.route('/<int:seat_id>/change-plan', methods=['POST'])
 def change_subscription_plan(seat_id):
-    """Switch a student between 30-day and 90-day plan. Recalculates end_date from start_date."""
+    """Switch a student between 30-day and 90-day plan. New end_date = today + plan_days."""
     data = request.json
     new_plan_days = int(data.get('plan_days', 30))      # 30 or 90
     new_total_amount = float(data.get('total_amount', 700))  # fee for the new plan
@@ -118,8 +118,12 @@ def change_subscription_plan(seat_id):
 
     try:
         from datetime import datetime as dt, timedelta
-        start = dt.strptime(seat['start_date'], '%Y-%m-%d')
-        new_end = start + timedelta(days=new_plan_days)
+
+        # Use TODAY as the new subscription start — not the original registration date.
+        # This prevents accidentally going backwards in time for students who have renewed.
+        today = dt.now()
+        new_end = today + timedelta(days=new_plan_days)
+        new_start_str = today.strftime('%Y-%m-%d')
         new_end_str = new_end.strftime('%Y-%m-%d')
 
         # Recalculate pending balance with new total
@@ -127,6 +131,7 @@ def change_subscription_plan(seat_id):
         new_pending = max(0.0, new_total_amount - amount_paid)
 
         update_payload = {
+            'start_date': new_start_str,
             'end_date': new_end_str,
             'total_amount': new_total_amount,
             'pending_balance': new_pending,
@@ -137,6 +142,7 @@ def change_subscription_plan(seat_id):
                 "success": True,
                 "message": f"Plan changed to {new_plan_days}-day. New end date: {new_end_str}",
                 "new_end_date": new_end_str,
+                "new_start_date": new_start_str,
             })
         return jsonify({"success": False, "message": "Failed to update plan."}), 400
     except Exception as e:
