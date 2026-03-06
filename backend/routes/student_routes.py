@@ -72,7 +72,9 @@ def register_student():
                     "amount": float(student_data['amount_paid']),
                     "seat_number": seat_number,
                     "student_name": student_data['student_name'],
-                    "payment_mode": student_data.get('payment_mode', 'Offline')
+                    "payment_mode": student_data.get('payment_mode', 'Offline'),
+                    "start_date": student_data.get('start_date', ''),
+                    "end_date": student_data.get('end_date', ''),
                 })
             return jsonify({"success": True, "message": "Student registered successfully.", "data": student_data})
         return jsonify({"success": False, "message": "Failed to update seat"}), 400
@@ -192,7 +194,9 @@ def renew_student(seat_id):
                     "amount": additional_paid,
                     "seat_number": seat_id,
                     "student_name": seat.get('student_name', ''),
-                    "payment_mode": updated_data.get('payment_mode', 'Offline')
+                    "payment_mode": updated_data.get('payment_mode', 'Offline'),
+                    "start_date": seat.get('end_date', ''),
+                    "end_date": new_end_date,
                 })
             return jsonify({"success": True, "message": "Renewed successfully.", "receipt_path": updated_data['receipt_path']})
             
@@ -269,7 +273,9 @@ def pay_dues(seat_id):
                 "amount": float(amount),
                 "seat_number": seat_id,
                 "student_name": seat.get('student_name', ''),
-                "payment_mode": updated_data.get('payment_mode', 'Offline')
+                "payment_mode": updated_data.get('payment_mode', 'Offline'),
+                "start_date": seat.get('start_date', ''),
+                "end_date": seat.get('end_date', '')
             })
             return jsonify({"success": True, "message": "Dues cleared successfully.", "receipt_path": updated_data['receipt_path']})
             

@@ -439,14 +439,16 @@ function openSeatModal(seatNumber) {
                     return;
                 }
                 let html = `
-                    <div style="padding: 8px 12px; background: var(--primary-bg); border-bottom: 1px solid var(--border); font-size: 12px; font-weight: 600; color: var(--text-secondary); display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px;">
-                        <span>#</span><span>Date</span><span>Type</span><span>Amount / Mode</span>
+                    <div style="padding: 8px 12px; background: var(--primary-bg); border-bottom: 1px solid var(--border); font-size: 11px; font-weight: 600; color: var(--text-secondary); display: grid; grid-template-columns: 25px 1.5fr 1.5fr 1.5fr 1.2fr 1.5fr; gap: 8px;">
+                        <span>#</span><span>Txn Date</span><span>Start</span><span>End</span><span>Type</span><span>Amount/Mode</span>
                     </div>`;
                 res.data.forEach((tx, idx) => {
                     html += `
-                    <div style="padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: 13px; display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; align-items: center;">
-                        <span style="color: var(--text-secondary); font-size: 12px;">${idx + 1}</span>
+                    <div style="padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: 12px; display: grid; grid-template-columns: 25px 1.5fr 1.5fr 1.5fr 1.2fr 1.5fr; gap: 8px; align-items: center;">
+                        <span style="color: var(--text-secondary); font-size: 11px;">${idx + 1}</span>
                         <span>${tx.date || '—'}</span>
+                        <span style="color: #059669; font-weight: 500;">${tx.start_date ? tx.start_date : '—'}</span>
+                        <span style="color: #dc2626; font-weight: 500;">${tx.end_date ? tx.end_date : '—'}</span>
                         <span style="font-weight: 600; color: ${tx.type === 'Registration' ? 'var(--primary)' : tx.type === 'Renewal' ? 'var(--vacant)' : 'var(--pending)'};">${tx.type || '—'}</span>
                         <span>₹${tx.amount || 0} <small style="color: var(--text-secondary);">(${tx.payment_mode || '—'})</small></span>
                     </div>`;
