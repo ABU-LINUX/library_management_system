@@ -70,9 +70,18 @@ class GoogleSheetsAPI:
 
             # Transactions Tab
             self.transactions_ws = self._get_or_create_worksheet("Transactions")
-            target_trans_headers = ["timestamp", "date", "type", "amount", "seat_number", "student_name", "payment_mode"]
-            if not self.transactions_ws.row_values(1):
+            target_trans_headers = ["timestamp", "date", "type", "amount", "seat_number", "student_name", "payment_mode", "start_date", "end_date"]
+            existing_trans_headers = self.transactions_ws.row_values(1)
+            if not existing_trans_headers:
                 self.transactions_ws.append_row(target_trans_headers)
+            else:
+                # Migration: add missing columns to existing sheet header row
+                headers_to_add = [h for h in target_trans_headers if h not in existing_trans_headers]
+                if headers_to_add:
+                    next_col = len(existing_trans_headers) + 1
+                    for i, col_name in enumerate(headers_to_add):
+                        col_letter = gspread.utils.rowcol_to_a1(1, next_col + i)
+                        self.transactions_ws.update(values=[[col_name]], range_name=col_letter)
 
     def _row_to_dict(self, row, headers):
         d = {}
@@ -134,6 +143,9 @@ class GoogleSheetsAPI:
             current_row = records[row_index - 1]
             current_dict = self._row_to_dict(current_row, headers)
             
+            # Check if this is a new registration (seat was empty)
+            is_new_registration = not current_dict.get("is_occupied", False)
+
             # Update with new
             for k, v in student_data.items():
                 current_dict[k] = v
@@ -152,6 +164,35 @@ class GoogleSheetsAPI:
             # Update cell range
             range_name = f"A{row_index}:{gspread.utils.rowcol_to_a1(row_index, len(headers))}"
             self.active_ws.update(values=[new_row], range_name=range_name)
+
+            if is_new_registration:
+                self.add_transaction({
+                    "date": student_data.get('start_date', datetime.now().strftime("%Y-%m-%d")),
+                    "type": "Registration",
+                    "amount": float(student_data['amount_paid']),
+                    "seat_number": seat_number,
+                    "student_name": student_data['student_name'],
+                    "payment_mode": student_data.get('payment_mode', 'Offline'),
+                    "start_date": student_data.get('start_date', ''),
+                    "end_date": student_data.get('end_date', ''),
+                })
+            else: # This is a renewal
+                # Calculate additional paid amount if any
+                old_amount_paid = float(records[row_index - 1][headers.index("amount_paid")])
+                new_amount_paid = float(student_data.get("amount_paid", old_amount_paid))
+                additional_paid = new_amount_paid - old_amount_paid
+
+                if additional_paid > 0:
+                    self.add_transaction({
+                        "date": datetime.now().strftime("%Y-%m-%d"),
+                        "type": "Renewal",
+                        "amount": additional_paid,
+                        "seat_number": seat_number,
+                        "student_name": student_data.get('student_name', current_dict.get('student_name', '')),
+                        "payment_mode": student_data.get('payment_mode', current_dict.get('payment_mode', 'Offline')),
+                        "start_date": current_dict.get('start_date', ''), # Use current start_date
+                        "end_date": student_data.get('end_date', current_dict.get('end_date', '')), # Use new end_date
+                    })
             return True
 
     def clear_seat(self, seat_number, archive=True):
