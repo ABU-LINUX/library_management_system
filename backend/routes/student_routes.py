@@ -102,6 +102,47 @@ def update_student_details(seat_id):
         return jsonify({"success": False, "message": str(e)}), 400
 
 
+@bp.route('/<int:seat_id>/change-plan', methods=['POST'])
+def change_subscription_plan(seat_id):
+    """Switch a student between 30-day and 90-day plan. Recalculates end_date from start_date."""
+    data = request.json
+    new_plan_days = int(data.get('plan_days', 30))      # 30 or 90
+    new_total_amount = float(data.get('total_amount', 700))  # fee for the new plan
+
+    if new_plan_days not in [30, 90]:
+        return jsonify({"success": False, "message": "Plan must be 30 or 90 days."}), 400
+
+    seat = db.get_seat(seat_id)
+    if not seat or not seat.get('is_occupied'):
+        return jsonify({"success": False, "message": "Seat is not occupied."}), 400
+
+    try:
+        from datetime import datetime as dt, timedelta
+        start = dt.strptime(seat['start_date'], '%Y-%m-%d')
+        new_end = start + timedelta(days=new_plan_days)
+        new_end_str = new_end.strftime('%Y-%m-%d')
+
+        # Recalculate pending balance with new total
+        amount_paid = float(seat.get('amount_paid', 0))
+        new_pending = max(0.0, new_total_amount - amount_paid)
+
+        update_payload = {
+            'end_date': new_end_str,
+            'total_amount': new_total_amount,
+            'pending_balance': new_pending,
+        }
+        success = db.update_seat(seat_id, update_payload)
+        if success:
+            return jsonify({
+                "success": True,
+                "message": f"Plan changed to {new_plan_days}-day. New end date: {new_end_str}",
+                "new_end_date": new_end_str,
+            })
+        return jsonify({"success": False, "message": "Failed to update plan."}), 400
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 400
+
+
 @bp.route('/<int:seat_id>/renew', methods=['POST'])
 def renew_student(seat_id):
     data = request.json

@@ -405,6 +405,7 @@ function openSeatModal(seatNumber) {
                 return '<button class="btn-primary full-width" onclick="showRenewDialog(' + seatNumber + ')">Renew Subscription</button>';
             })()}
                 <button class="btn-pending full-width" onclick="downloadLastReceipt(${seatNumber})">Download Receipt</button>
+                <button class="btn-warning full-width" style="padding:10px; font-size:13px; font-weight:600; border:none; border-radius:8px; cursor:pointer; background:linear-gradient(135deg,#7c3aed,#6d28d9); color:#fff;" onclick="showChangePlanDialog(${seatNumber})">🔄 Change Plan</button>
             </div>
             
             ${parseFloat(seat.pending_balance) > 0 ? `
@@ -482,6 +483,95 @@ function closeRenewDialog() {
     document.getElementById('renewModal').style.display = "none";
     document.getElementById('seatModal').style.display = "block";
 }
+
+function showChangePlanDialog(seatNumber) {
+    const seat = cachedSeats.find(s => s.seat_number == seatNumber);
+    if (!seat) return;
+
+    // Detect current plan
+    let currentDays = 30;
+    if (seat.start_date && seat.end_date) {
+        const diff = Math.round((new Date(seat.end_date) - new Date(seat.start_date)) / (1000 * 60 * 60 * 24));
+        currentDays = diff >= 85 ? 90 : 30;
+    }
+    const otherDays = currentDays === 30 ? 90 : 30;
+    const defaultFee = otherDays === 90 ? 1999 : 799;
+
+    const body = document.getElementById('modalBody');
+    body.innerHTML = `
+        <div style="padding:8px 0;">
+            <div style="background:linear-gradient(135deg,#1e293b,#0f172a); border-radius:10px; padding:12px 16px; margin-bottom:16px; text-align:center;">
+                <div style="font-size:10px; color:#94a3b8; text-transform:uppercase; letter-spacing:.08em; margin-bottom:4px;">Current Plan</div>
+                <div style="font-size:18px; font-weight:800; color:#f8fafc;">${currentDays}-Day Plan</div>
+                <div style="font-size:11px; color:#94a3b8; margin-top:2px;">Seat ${seatNumber} · ${seat.student_name}</div>
+            </div>
+
+            <div style="font-size:12px; color:var(--text-secondary); font-weight:600; text-transform:uppercase; letter-spacing:.07em; margin-bottom:10px;">Switch to:</div>
+
+            <!-- Plan selector cards -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px;">
+                <div id="plan_30" onclick="selectPlan(30, 799)" style="border:2px solid ${otherDays === 30 ? '#6366f1' : '#e2e8f0'}; border-radius:10px; padding:12px; text-align:center; cursor:pointer; transition:.2s; background:${otherDays === 30 ? '#eef2ff' : 'var(--bg-color)'};">
+                    <div style="font-size:20px; margin-bottom:4px;">📅</div>
+                    <div style="font-weight:800; font-size:14px; color:var(--text-primary);">30-Day</div>
+                    <div style="font-size:11px; color:var(--text-secondary);">₹799</div>
+                </div>
+                <div id="plan_90" onclick="selectPlan(90, 1999)" style="border:2px solid ${otherDays === 90 ? '#6366f1' : '#e2e8f0'}; border-radius:10px; padding:12px; text-align:center; cursor:pointer; transition:.2s; background:${otherDays === 90 ? '#eef2ff' : 'var(--bg-color)'};">
+                    <div style="font-size:20px; margin-bottom:4px;">📆</div>
+                    <div style="font-weight:800; font-size:14px; color:var(--text-primary);">90-Day</div>
+                    <div style="font-size:11px; color:var(--text-secondary);">₹1999</div>
+                </div>
+            </div>
+
+            <input type="hidden" id="changePlanDays" value="${otherDays}">
+
+            <div style="margin-bottom:14px;">
+                <label style="font-size:12px; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:4px;">New Plan Fee (₹)</label>
+                <input type="number" id="changePlanFee" value="${defaultFee}" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:8px; font-size:14px; font-weight:600;" class="form-control">
+            </div>
+
+            <button onclick="confirmChangePlan(${seatNumber})" style="width:100%; padding:11px; background:linear-gradient(135deg,#7c3aed,#6d28d9); color:#fff; font-size:14px; font-weight:700; border:none; border-radius:8px; cursor:pointer;">Confirm Plan Change</button>
+            <button onclick="openSeatModal(${seatNumber})" style="width:100%; margin-top:8px; padding:9px; background:transparent; color:var(--text-secondary); font-size:13px; border:1px solid var(--border); border-radius:8px; cursor:pointer;">← Cancel</button>
+        </div>
+    `;
+}
+
+function selectPlan(days, fee) {
+    document.getElementById('changePlanDays').value = days;
+    document.getElementById('changePlanFee').value = fee;
+    // Highlight selected card
+    document.getElementById('plan_30').style.border = days === 30 ? '2px solid #6366f1' : '2px solid #e2e8f0';
+    document.getElementById('plan_30').style.background = days === 30 ? '#eef2ff' : 'var(--bg-color)';
+    document.getElementById('plan_90').style.border = days === 90 ? '2px solid #6366f1' : '2px solid #e2e8f0';
+    document.getElementById('plan_90').style.background = days === 90 ? '#eef2ff' : 'var(--bg-color)';
+}
+
+function confirmChangePlan(seatNumber) {
+    const planDays = parseInt(document.getElementById('changePlanDays').value);
+    const fee = parseFloat(document.getElementById('changePlanFee').value);
+
+    if (!planDays || !fee) {
+        showToast('Please select a plan and enter a fee.', 'error');
+        return;
+    }
+
+    fetch(`/api/students/${seatNumber}/change-plan`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan_days: planDays, total_amount: fee })
+    })
+        .then(r => r.json())
+        .then(res => {
+            if (res.success) {
+                showToast(`✅ Plan changed to ${planDays}-Day. New end: ${res.new_end_date}`, 'success');
+                document.getElementById('seatModal').style.display = 'none';
+                fetchDashboardData();
+            } else {
+                showToast(res.message || 'Change failed.', 'error');
+            }
+        })
+        .catch(err => showToast('Error: ' + err, 'error'));
+}
+
 
 function showCancelDialog(seatNumber) {
     document.getElementById('seatModal').style.display = "none";
