@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library & Study Room Management</title>
+    <!-- Modern Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive_grid.css') }}">
+    <!-- Load dashboard JS after DOM -->
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}" defer></script>
+</head>
+<body>
+    <header class="top-bar">
+        <h1>Dashboard</h1>
+        <div class="metrics">
+            <div class="metric-card">
+                <span class="label">Total Students:</span>
+                <span class="value" id="total_students">0</span>
+            </div>
+            <div class="metric-card">
+                <span class="label">Seats (Occ/Vac):</span>
+                <span class="value" id="seats_ratio">0/81</span>
+            </div>
+            <div class="metric-card" style="cursor: pointer; transition: background 0.2s;" onclick="showPendingDues()" title="Click to view all pending dues">
+                <span class="label">Pending Dues:</span>
+                <span class="value text-purple">₹<span id="total_dues">0</span></span>
+            </div>
+        </div>
+        <div style="display: flex; gap: 8px;">
+            <button class="btn-primary" onclick="openReportsModal()">Reports</button>
+            <a href="/logout" class="btn-logout">Logout</a>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Search Bar -->
+        <div class="search-container" style="margin-bottom: 24px; display: flex; gap: 10px;">
+            <input type="text" id="searchInput" placeholder="Search by name or mobile number..." style="flex-grow: 1; padding: 14px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 16px; font-family: inherit;">
+            <button class="btn-primary" onclick="searchStudent()" style="padding: 0 24px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer;">Search</button>
+        </div>
+
+        <!-- Two-column layout: side panel + seat grid -->
+        <div style="display: flex; gap: 20px; align-items: flex-start;">
+
+            <!-- LEFT SIDE PANEL: Alerts -->
+            <div id="alertsSidePanel" style="width: 270px; flex-shrink: 0; background: var(--surface); border-radius: 14px; border: 1px solid var(--border); box-shadow: 0 2px 12px rgba(0,0,0,0.06); overflow: hidden; position: sticky; top: 20px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: linear-gradient(135deg, #1e293b, #0f172a); cursor: pointer;" onclick="toggleAlertsPanel()">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 16px;">🔔</span>
+                        <span style="color: #f1f5f9; font-weight: 700; font-size: 14px;">Alerts &amp; Expirations</span>
+                    </div>
+                    <span id="alertsPanelChevron" style="color: #94a3b8; font-size: 12px; transition: transform 0.3s;">▼</span>
+                </div>
+                <div id="alertsPanelContent" style="padding: 12px;">
+                    <ul id="action_list_items" style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; max-height: 70vh; overflow-y: auto;">
+                        <!-- Javascript will populate this -->
+                    </ul>
+                </div>
+            </div>
+
+            <!-- RIGHT: Seat Grid -->
+            <div style="flex: 1; min-width: 0;">
+                <section class="seat-grid-container">
+                    <div class="legend">
+                        <span class="legend-item"><span class="box green"></span> Vacant</span>
+                        <span class="legend-item"><span class="box red"></span> Occupied</span>
+                        <span class="legend-item"><span class="box yellow"></span> Exp&lt;3 Days</span>
+                        <span class="legend-item"><span class="box purple-border"></span> Dues Pending</span>
+                    </div>
+                    <div class="seat-grid" id="seat_grid">
+                        <!-- Javascript will generate 81 seats here -->
+                    </div>
+                </section>
+            </div>
+
+        </div>
+    </main>
+
+
+    <!-- Modal for Registration / Profile -->
+    <div id="seatModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="document.getElementById('seatModal').style.display='none'">&times;</span>
+            <h2 id="modalTitle">Seat Options</h2>
+            <div id="modalBody">
+                <!-- Forms injected by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Renew Confirmation -->
+    <div id="renewModal" class="modal">
+        <div class="modal-content">
+            <h2>Renew Registration</h2>
+            <p>Select renewal duration and payment details.</p>
+            <input type="hidden" id="renew_seat_number">
+            
+            <div class="form-group">
+                <label>Duration</label>
+                <select id="renew_duration" onchange="document.getElementById('renew_total_display').innerText = (this.value === '90') ? '1900' : '700'">
+                    <option value="30">30 Days</option>
+                    <option value="90">90 Days</option>
+                </select>
+            </div>
+            <p style="margin-bottom: 20px; font-weight: 500; font-size: 14px; color: var(--text-secondary);">Total Fee Added: <strong style="color: var(--occupied);">₹<span id="renew_total_display">700</span></strong></p>
+
+            <div class="form-group">
+                <label>Transaction Date</label>
+                <input type="date" id="renew_date" placeholder="Leave empty for today">
+            </div>
+
+            <div class="form-group">
+                <label>How much is the student paying now? (₹)</label>
+                <input type="number" id="renew_amount_paid" value="0" required>
+            </div>
+            <div class="form-group">
+                <label>Payment Mode</label>
+                <select id="renew_payment_mode">
+                    <option value="Online">Online</option>
+                    <option value="Offline">Offline</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn-primary full-width" onclick="confirmRenew()">Confirm Renew</button>
+                <button class="btn-secondary full-width" onclick="closeRenewDialog()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeEditDialog()">&times;</span>
+            <h2>Edit Student Details</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 20px; font-size: 14px;">Update personal info, adjust the start date or change the billing plan without creating a new transaction.</p>
+            <input type="hidden" id="edit_seat_number">
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div class="form-group">
+                    <label>Start Date</label>
+                    <input type="date" id="edit_start_date" required>
+                </div>
+                <div class="form-group">
+                    <label>Plan</label>
+                    <select id="edit_plan">
+                        <option value="30">30 Days (₹700)</option>
+                        <option value="90">90 Days (₹1900)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" id="edit_name" placeholder="E.g. Rahul Kumar" required>
+            </div>
+
+            <div class="form-group">
+                <label>Mobile Number</label>
+                <input type="text" id="edit_mobile" placeholder="10 digits only" required>
+            </div>
+
+            <div class="form-group">
+                <label>Address</label>
+                <input type="text" id="edit_address" placeholder="Enter full address" required>
+            </div>
+
+            <div class="form-group">
+                <label>Exam Prep</label>
+                <div class="exam-prep-chips">
+                    <label><input type="checkbox" name="edit_exam_prep" value="iit-jee"> IIT-JEE</label>
+                    <label><input type="checkbox" name="edit_exam_prep" value="neet"> NEET</label>
+                    <label><input type="checkbox" name="edit_exam_prep" value="ssc"> SSC</label>
+                    <label><input type="checkbox" name="edit_exam_prep" value="railway"> Railway</label>
+                    <label><input type="checkbox" name="edit_exam_prep" value="boards"> Boards</label>
+                    <label><input type="checkbox" name="edit_exam_prep" value="upsc/mpsc"> UPSC/MPSC</label>
+                    <label><input type="checkbox" name="edit_exam_prep" value="other"> Other</label>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn-primary full-width" onclick="submitEditProfile()">Save Changes</button>
+                <button class="btn-secondary full-width" onclick="closeEditDialog()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Cancel Confirmation -->
+    <div id="cancelModal" class="modal">
+        <div class="modal-content">
+            <h2>Cancel Subscription</h2>
+            <p>Are you sure you want to cancel and clear this seat?</p>
+            <input type="hidden" id="cancel_seat_number">
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn-danger" onclick="confirmCancel()">Yes, Cancel It</button>
+                <button class="btn-secondary full-width" onclick="closeCancelDialog()">Go Back</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Pending Dues List -->
+    <div id="duesModal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <span class="close-btn" onclick="document.getElementById('duesModal').style.display='none'">&times;</span>
+            <h2>Students with Pending Dues</h2>
+            <div style="max-height: 400px; overflow-y: auto; margin-top: 20px;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                    <thead>
+                        <tr>
+                            <th style="padding: 12px; color: var(--text-secondary);">Seat</th>
+                            <th style="padding: 12px; color: var(--text-secondary);">Student</th>
+                            <th style="padding: 12px; color: var(--text-secondary);">Mobile</th>
+                            <th style="padding: 12px; color: var(--text-secondary); text-align: right;">Amount Due</th>
+                            <th style="padding: 12px; color: var(--text-secondary); text-align: center;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dues_list_body">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+            <div style="margin-top: 20px; text-align: right; font-weight: bold; font-size: 18px;">
+                Total: ₹<span id="dues_modal_total">0</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Pay Dues -->
+    <div id="payDuesModal" class="modal">
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+            <span class="close-btn" onclick="closePayDuesDialog()">&times;</span>
+            <h2>Clear Dues</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 24px;">Process remaining payment for Seat #<span id="pay_dues_seat_display"></span></p>
+            
+            <input type="hidden" id="pay_dues_seat_number">
+            
+            <div class="form-group" style="text-align: left;">
+                <label>Transaction Date</label>
+                <input type="date" id="pay_dues_date" placeholder="Leave empty for today">
+            </div>
+            
+            <div class="form-group" style="text-align: left;">
+                <label>Amount Paying Now (₹)</label>
+                <input type="number" id="pay_dues_amount" placeholder="e.g. 500" required>
+            </div>
+            <div class="form-group" style="text-align: left;">
+                <label>Payment Mode</label>
+                <select id="pay_dues_payment_mode">
+                    <option value="Online">Online</option>
+                    <option value="Offline">Offline</option>
+                </select>
+            </div>
+
+            <div style="display: flex; gap: 12px; margin-top: 24px;">
+                <button class="btn-primary" style="flex: 1;" onclick="confirmPayDues()">Process Payment</button>
+                <button class="btn-secondary" style="flex: 1;" onclick="closePayDuesDialog()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Financial Reports -->
+    <div id="reportsModal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <span class="close-btn" onclick="document.getElementById('reportsModal').style.display='none'">&times;</span>
+            <h2>Financial Statements</h2>
+            
+            <div style="display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;">
+                <select id="reportFilter" class="form-group" style="margin-bottom: 0; padding: 10px; width: auto;" onchange="applyReportFilter()">
+                    <option value="all" selected>All Time</option>
+                    <option value="today">Today</option>
+                    <option value="this_week">This Week</option>
+                    <option value="this_month">This Month</option>
+                    <option value="last_month">Last Month</option>
+                </select>
+                <div style="margin-left: auto; display: flex; gap: 12px; align-items: center;">
+                    <div style="background: var(--surface); padding: 10px 20px; border-radius: 8px; font-weight: bold; border: 1px solid var(--border);">
+                        Total Revenue: ₹<span id="reportTotalRevenue" style="color: var(--success);">0.00</span>
+                    </div>
+                    <button class="btn-primary" onclick="printReport()" style="padding: 10px 20px; font-weight: bold; background: #3b82f6;">Print Report</button>
+                </div>
+            </div>
+
+            <div style="max-height: 400px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
+                    <thead>
+                        <tr>
+                            <th style="padding: 12px; border-bottom: 1px solid var(--border);">Date</th>
+                            <th style="padding: 12px; border-bottom: 1px solid var(--border);">Student (Seat)</th>
+                            <th style="padding: 12px; border-bottom: 1px solid var(--border);">Type</th>
+                            <th style="padding: 12px; border-bottom: 1px solid var(--border);">Mode</th>
+                            <th style="padding: 12px; border-bottom: 1px solid var(--border); text-align: right;">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportsTableBody">
+                        <tr><td colspan="5" style="text-align:center; padding: 20px;">Loading statements...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" style="position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px;"></div>
+
+</body>
+</html>
