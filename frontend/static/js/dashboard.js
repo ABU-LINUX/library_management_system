@@ -232,21 +232,21 @@ function renderDashboard(seats) {
             ]
         ];
 
-        const buildBlock = (partitionElement, blockArr) => {
+        const buildBlock = (partitionElement, blockArr, align) => {
             const blockDiv = document.createElement('div');
             blockDiv.style.display = 'flex';
             blockDiv.style.flexDirection = 'column';
-            blockDiv.style.gap = '8px'; // tightly pack rows in a block
-            blockDiv.style.padding = '12px';
-            blockDiv.style.background = 'var(--bg-color)'; // slight background contrast
+            blockDiv.style.gap = '4px'; // tightly pack rows in a block
+            blockDiv.style.padding = '8px';
+            blockDiv.style.background = 'var(--bg-color)'; 
             blockDiv.style.border = '1px solid var(--border)';
-            blockDiv.style.borderRadius = '12px';
+            blockDiv.style.borderRadius = '8px';
 
             blockArr.forEach(rowArr => {
                 const rowDiv = document.createElement('div');
                 rowDiv.style.display = 'flex';
-                rowDiv.style.gap = '10px';
-                rowDiv.style.justifyContent = 'center';
+                rowDiv.style.gap = '4px'; // tight horizontal gap to prevent scrolling
+                rowDiv.style.justifyContent = align;
                 rowArr.forEach(seatNum => {
                     if (seatElements[seatNum]) {
                         rowDiv.appendChild(seatElements[seatNum]);
@@ -264,11 +264,11 @@ function renderDashboard(seats) {
             partitionElement.appendChild(blockDiv);
         };
 
-        leftPartition.style.gap = '24px';
-        rightPartition.style.gap = '24px';
+        leftPartition.style.gap = '16px';
+        rightPartition.style.gap = '16px';
 
-        leftBlocks.forEach(arr => buildBlock(leftPartition, arr));
-        rightBlocks.forEach(arr => buildBlock(rightPartition, arr));
+        leftBlocks.forEach(arr => buildBlock(leftPartition, arr, 'flex-end'));
+        rightBlocks.forEach(arr => buildBlock(rightPartition, arr, 'flex-start'));
 
         const unplacedSeats = Object.keys(seatElements).map(Number).sort((a,b)=>a-b);
         if (unplacedSeats.length > 0 && unplacedContainer && unplacedGrid) {
