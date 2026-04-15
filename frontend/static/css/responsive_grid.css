@@ -94,7 +94,7 @@
 .seat {
     width: 100%;
     min-width: 0;
-    max-width: 55px;
+    max-width: 80px;
     aspect-ratio: 1 / 1.1;
     overflow: hidden;
     display: flex;
@@ -102,7 +102,7 @@
     align-items: center;
     justify-content: center;
     gap: 3px;
-    font-size: 11px;
+    font-size: clamp(8px, 1.5vw, 18px);
     font-weight: 700;
     font-family: var(--font-body);
     border-radius: 10px;
