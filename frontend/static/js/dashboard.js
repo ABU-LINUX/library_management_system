@@ -343,6 +343,39 @@ function showPendingDues() {
     document.getElementById('duesModal').style.display = 'block';
 }
 
+window.handleProgrammeChange = function(val) {
+    const durationSelect = document.getElementById('duration');
+    const totalAmount = document.getElementById('total_amount');
+    const amountPaid = document.getElementById('amount_paid');
+    
+    const customOpt = durationSelect.querySelector('option[value="custom_prog"]');
+    if (customOpt) customOpt.remove();
+
+    if (val === 'none') {
+        durationSelect.value = "30";
+        durationSelect.disabled = false;
+        totalAmount.value = "700";
+        amountPaid.value = "";
+        totalAmount.readOnly = false;
+        amountPaid.readOnly = false;
+    } else {
+        totalAmount.value = "0";
+        amountPaid.value = "0";
+        totalAmount.readOnly = true;
+        amountPaid.readOnly = true;
+        
+        let days = val.includes("2yr") ? "730" : "365";
+        
+        const opt = document.createElement('option');
+        opt.value = "custom_prog";
+        opt.setAttribute('data-days', days);
+        opt.text = days + " Days (Programme)";
+        durationSelect.appendChild(opt);
+        durationSelect.value = "custom_prog";
+        durationSelect.disabled = true;
+    }
+};
+
 function openSeatModal(seatNumber) {
     const seat = cachedSeats.find(s => s.seat_number == seatNumber);
     const modal = document.getElementById('seatModal');
@@ -376,6 +409,20 @@ function openSeatModal(seatNumber) {
                                 <label><input type="checkbox" name="exam_prep" value="upsc/mpsc"> UPSC/MPSC</label>
                                 <label><input type="checkbox" name="exam_prep" value="other"> Other</label>
                             </div>
+                        </div>
+
+                        <div class="form-group" style="padding: 12px; background: #f0fdf4; border-radius: 8px; border: 1px solid #bbf7d0; margin-bottom: 24px;">
+                            <label style="color: #166534; font-weight: 600;">Institute Student Programme (Fee Included)</label>
+                            <select id="institute_programme" style="margin-top: 8px; border-color: #bbf7d0; background-color: #fff;" onchange="window.handleProgrammeChange(this.value)" tabindex="4">
+                                <option value="none">-- Regular Library Student --</option>
+                                <option value="jee_2yr">JEE Mains & Advance (2 Year Programme)</option>
+                                <option value="jee_drop">JEE Mains & Advance (1 Year Dropper Programme)</option>
+                                <option value="neet_2yr">NEET (2 Year Programme)</option>
+                                <option value="neet_drop">NEET (1 Year Dropper Programme)</option>
+                                <option value="boards_11">Boards Class 11 (1 Year)</option>
+                                <option value="boards_12">Boards Class 12 (1 Year)</option>
+                                <option value="boards_1yr">Boards (1 Year Programme)</option>
+                            </select>
                         </div>
 
                         <div class="form-row">
@@ -763,9 +810,22 @@ function submitRegistration() {
     }
 
     // Collect checked exam prep values
-    const checkedExams = Array.from(document.querySelectorAll('input[name="exam_prep"]:checked'))
+    let checkedExams = Array.from(document.querySelectorAll('input[name="exam_prep"]:checked'))
         .map(cb => cb.value)
         .join(', ');
+
+    const progSelect = document.getElementById('institute_programme');
+    if (progSelect && progSelect.value !== 'none') {
+        const progText = progSelect.options[progSelect.selectedIndex].text;
+        checkedExams = progText + (checkedExams ? ' + ' + checkedExams : '');
+    }
+
+    const durationSelect = document.getElementById('duration');
+    let daysVal = durationSelect.value;
+    if (daysVal === 'custom_prog') {
+        const customOpt = durationSelect.querySelector('option[value="custom_prog"]');
+        if (customOpt) daysVal = customOpt.getAttribute('data-days');
+    }
 
     const data = {
         seat_number: seatNumber,
@@ -773,7 +833,7 @@ function submitRegistration() {
         mobile: mobile,
         address: address,
         exam_prep: checkedExams,
-        days: document.getElementById('duration').value,
+        days: parseInt(daysVal),
         total_amount: document.getElementById('total_amount').value,
         amount_paid: amountPaid,
         payment_mode: document.getElementById('payment_mode_reg').value
