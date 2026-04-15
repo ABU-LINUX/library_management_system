@@ -205,43 +205,70 @@ function renderDashboard(seats) {
         rightPartition.innerHTML = '';
         if (unplacedGrid) unplacedGrid.innerHTML = '';
 
-        const leftRows = [
-            [72, 71, 70, 69],
-            [73, 74, 75, 76, 77],
-            [78, 79, 80, 81]
+        const leftBlocks = [
+            [
+                [72, 71, 70, 69]
+            ],
+            [
+                [73, 74, 75, 76, 77],
+                [78, 79, 80, 81]
+            ]
         ];
 
-        const rightRows = [
-            [68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56],
-            [44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55],
-            [43, 42, 41, 40, 39, 38, 37, 36, 35, 34],
-            [24, 25, 26, 27, 28, 29, 30, 31, 32, 33],
-            [23, 22, 21, 20, 19, 18, 17, 16, 15, 14],
-            [10, 11, 12, 13]
+        const rightBlocks = [
+            [
+                [68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56]
+            ],
+            [
+                [44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55],
+                [43, 42, 41, 40, 39, 38, 37, 36, 35, 34]
+            ],
+            [
+                [24, 25, 26, 27, 28, 29, 30, 31, 32, 33],
+                [23, 22, 21, 20, 19, 18, 17, 16, 15, 14]
+            ],
+            [
+                [10, 11, 12, 13]
+            ]
         ];
 
-        const buildRow = (partitionElement, rowArr) => {
-            const rowDiv = document.createElement('div');
-            rowDiv.style.display = 'flex';
-            rowDiv.style.gap = '16px';
-            rowDiv.style.justifyContent = 'center';
-            rowArr.forEach(seatNum => {
-                if (seatElements[seatNum]) {
-                    rowDiv.appendChild(seatElements[seatNum]);
-                    delete seatElements[seatNum];
-                } else {
-                    const empty = document.createElement('div');
-                    empty.className = 'seat';
-                    empty.style.opacity = '0';
-                    empty.style.pointerEvents = 'none';
-                    rowDiv.appendChild(empty);
-                }
+        const buildBlock = (partitionElement, blockArr) => {
+            const blockDiv = document.createElement('div');
+            blockDiv.style.display = 'flex';
+            blockDiv.style.flexDirection = 'column';
+            blockDiv.style.gap = '8px'; // tightly pack rows in a block
+            blockDiv.style.padding = '12px';
+            blockDiv.style.background = 'var(--bg-color)'; // slight background contrast
+            blockDiv.style.border = '1px solid var(--border)';
+            blockDiv.style.borderRadius = '12px';
+
+            blockArr.forEach(rowArr => {
+                const rowDiv = document.createElement('div');
+                rowDiv.style.display = 'flex';
+                rowDiv.style.gap = '10px';
+                rowDiv.style.justifyContent = 'center';
+                rowArr.forEach(seatNum => {
+                    if (seatElements[seatNum]) {
+                        rowDiv.appendChild(seatElements[seatNum]);
+                        delete seatElements[seatNum];
+                    } else {
+                        const empty = document.createElement('div');
+                        empty.className = 'seat';
+                        empty.style.opacity = '0';
+                        empty.style.pointerEvents = 'none';
+                        rowDiv.appendChild(empty);
+                    }
+                });
+                blockDiv.appendChild(rowDiv);
             });
-            partitionElement.appendChild(rowDiv);
+            partitionElement.appendChild(blockDiv);
         };
 
-        leftRows.forEach(arr => buildRow(leftPartition, arr));
-        rightRows.forEach(arr => buildRow(rightPartition, arr));
+        leftPartition.style.gap = '24px';
+        rightPartition.style.gap = '24px';
+
+        leftBlocks.forEach(arr => buildBlock(leftPartition, arr));
+        rightBlocks.forEach(arr => buildBlock(rightPartition, arr));
 
         const unplacedSeats = Object.keys(seatElements).map(Number).sort((a,b)=>a-b);
         if (unplacedSeats.length > 0 && unplacedContainer && unplacedGrid) {
