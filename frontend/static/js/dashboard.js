@@ -285,8 +285,6 @@ function renderDashboard(seats) {
 
         leftPartition.style.gap = '16px';
         rightPartition.style.gap = '16px';
-        leftPartition.style.width = '100%';
-        rightPartition.style.width = '100%';
 
         leftBlocks.forEach(arr => buildBlock(leftPartition, arr, 'right', 5));
         rightBlocks.forEach(arr => buildBlock(rightPartition, arr, 'left', 13));
