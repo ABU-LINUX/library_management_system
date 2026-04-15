@@ -71,6 +71,15 @@
 }
 
 /* Pending uses subtle border/glow */
+.seat.purple-border {
+    box-shadow: 0 0 0 3px var(--bg-color), 0 0 0 5px var(--pending);
+}
+
+.seat.blue {
+    background: linear-gradient(135deg, #0284c7, #0369a1);
+    color: white;
+}
+
 .purple-border {
     background-color: var(--surface);
     color: var(--pending);

@@ -187,6 +187,10 @@ function renderDashboard(seats) {
                 div.classList.add('purple-border');
             }
         }
+        // Institute Student UI override
+        if (seat.is_occupied && seat.total_amount !== undefined && parseFloat(seat.total_amount) === 0) {
+            statusClass = 'blue';
+        }
 
         div.classList.add(statusClass);
         div.onclick = () => openSeatModal(seat.seat_number);
