@@ -87,8 +87,8 @@ function searchStudent() {
 
 function renderDashboard(seats) {
     console.log("renderDashboard called with seats:", seats);
-    const grid = document.getElementById('seat_grid');
-    grid.innerHTML = '';
+    // Prepare for custom layout
+    const seatElements = {};
 
     let occupiedCount = 0;
     let totalDues = 0;
@@ -191,8 +191,68 @@ function renderDashboard(seats) {
 
         div.classList.add(statusClass);
         div.onclick = () => openSeatModal(seat.seat_number);
-        grid.appendChild(div);
+        seatElements[seat.seat_number] = div;
     });
+
+    // Now render into partitions
+    const leftPartition = document.getElementById('left_partition');
+    const rightPartition = document.getElementById('right_partition');
+    const unplacedContainer = document.getElementById('unplaced_seats_container');
+    const unplacedGrid = document.getElementById('unplaced_seats_grid');
+
+    if (leftPartition && rightPartition) {
+        leftPartition.innerHTML = '';
+        rightPartition.innerHTML = '';
+        if (unplacedGrid) unplacedGrid.innerHTML = '';
+
+        const leftRows = [
+            [72, 71, 70, 69],
+            [73, 74, 75, 76, 77],
+            [78, 79, 80, 81]
+        ];
+
+        const rightRows = [
+            [68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56],
+            [44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55],
+            [43, 42, 41, 40, 39, 38, 37, 36, 35, 34],
+            [24, 25, 26, 27, 28, 29, 30, 31, 32, 33],
+            [23, 22, 21, 20, 19, 18, 17, 16, 15, 14],
+            [10, 11, 12, 13]
+        ];
+
+        const buildRow = (partitionElement, rowArr) => {
+            const rowDiv = document.createElement('div');
+            rowDiv.style.display = 'flex';
+            rowDiv.style.gap = '16px';
+            rowDiv.style.justifyContent = 'center';
+            rowArr.forEach(seatNum => {
+                if (seatElements[seatNum]) {
+                    rowDiv.appendChild(seatElements[seatNum]);
+                    delete seatElements[seatNum];
+                } else {
+                    const empty = document.createElement('div');
+                    empty.className = 'seat';
+                    empty.style.opacity = '0';
+                    empty.style.pointerEvents = 'none';
+                    rowDiv.appendChild(empty);
+                }
+            });
+            partitionElement.appendChild(rowDiv);
+        };
+
+        leftRows.forEach(arr => buildRow(leftPartition, arr));
+        rightRows.forEach(arr => buildRow(rightPartition, arr));
+
+        const unplacedSeats = Object.keys(seatElements).map(Number).sort((a,b)=>a-b);
+        if (unplacedSeats.length > 0 && unplacedContainer && unplacedGrid) {
+            unplacedContainer.style.display = 'block';
+            unplacedSeats.forEach(seatNum => {
+                unplacedGrid.appendChild(seatElements[seatNum]);
+            });
+        } else if (unplacedContainer) {
+            unplacedContainer.style.display = 'none';
+        }
+    }
 
     // Show "All clear" if no alert items
     if (actionList.children.length === 0) {
