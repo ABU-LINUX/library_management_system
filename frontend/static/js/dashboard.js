@@ -247,6 +247,7 @@ function renderDashboard(seats) {
                 rowDiv.style.display = 'flex';
                 rowDiv.style.gap = '4px'; // tight horizontal gap to prevent scrolling
                 rowDiv.style.justifyContent = align;
+                rowDiv.style.width = '100%';
                 rowArr.forEach(seatNum => {
                     if (seatElements[seatNum]) {
                         rowDiv.appendChild(seatElements[seatNum]);
