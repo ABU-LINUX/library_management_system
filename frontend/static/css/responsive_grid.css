@@ -92,8 +92,10 @@
 }
 
 .seat {
-    flex: 0 0 44px;
-    height: 48px;
+    width: 100%;
+    min-width: 0;
+    max-width: 55px;
+    aspect-ratio: 1 / 1.1;
     display: flex;
     flex-direction: column;
     align-items: center;

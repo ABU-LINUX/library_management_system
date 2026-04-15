@@ -231,22 +231,33 @@ function renderDashboard(seats) {
             ]
         ];
 
-        const buildBlock = (partitionElement, blockArr, align) => {
+        const buildBlock = (partitionElement, blockArr, align, columns) => {
             const blockDiv = document.createElement('div');
             blockDiv.style.display = 'flex';
             blockDiv.style.flexDirection = 'column';
-            blockDiv.style.gap = '4px'; // tightly pack rows in a block
+            blockDiv.style.gap = '4px'; 
             blockDiv.style.padding = '8px';
             blockDiv.style.background = 'var(--bg-color)'; 
             blockDiv.style.border = '1px solid var(--border)';
             blockDiv.style.borderRadius = '8px';
+            blockDiv.style.width = '100%';
 
             blockArr.forEach(rowArr => {
                 const rowDiv = document.createElement('div');
-                rowDiv.style.display = 'flex';
-                rowDiv.style.gap = '4px'; // tight horizontal gap to prevent scrolling
-                rowDiv.style.justifyContent = align;
+                rowDiv.style.display = 'grid';
+                rowDiv.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
+                rowDiv.style.gap = '4px'; 
                 rowDiv.style.width = '100%';
+
+                const padding = columns - rowArr.length;
+
+                if (align === 'right' && padding > 0) {
+                    for(let i=0; i<padding; i++) {
+                        const spacer = document.createElement('div');
+                        rowDiv.appendChild(spacer);
+                    }
+                }
+
                 rowArr.forEach(seatNum => {
                     if (seatElements[seatNum]) {
                         rowDiv.appendChild(seatElements[seatNum]);
@@ -259,6 +270,14 @@ function renderDashboard(seats) {
                         rowDiv.appendChild(empty);
                     }
                 });
+
+                if (align === 'left' && padding > 0) {
+                    for(let i=0; i<padding; i++) {
+                        const spacer = document.createElement('div');
+                        rowDiv.appendChild(spacer);
+                    }
+                }
+
                 blockDiv.appendChild(rowDiv);
             });
             partitionElement.appendChild(blockDiv);
@@ -266,9 +285,11 @@ function renderDashboard(seats) {
 
         leftPartition.style.gap = '16px';
         rightPartition.style.gap = '16px';
+        leftPartition.style.width = '100%';
+        rightPartition.style.width = '100%';
 
-        leftBlocks.forEach(arr => buildBlock(leftPartition, arr, 'flex-end'));
-        rightBlocks.forEach(arr => buildBlock(rightPartition, arr, 'flex-start'));
+        leftBlocks.forEach(arr => buildBlock(leftPartition, arr, 'right', 5));
+        rightBlocks.forEach(arr => buildBlock(rightPartition, arr, 'left', 13));
 
         const unplacedSeats = Object.keys(seatElements).map(Number).sort((a,b)=>a-b);
         if (unplacedSeats.length > 0 && unplacedContainer && unplacedGrid) {
