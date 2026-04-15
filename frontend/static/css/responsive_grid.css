@@ -92,15 +92,14 @@
 }
 
 .seat {
-    flex: 0 1 55px;
-    min-width: 0;
-    aspect-ratio: 1 / 1.1;
+    flex: 0 0 44px;
+    height: 48px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 2px;
-    font-size: clamp(8px, 1.2vw, 13px);
+    gap: 3px;
+    font-size: 11px;
     font-weight: 700;
     font-family: var(--font-body);
     border-radius: 10px;
