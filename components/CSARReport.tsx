@@ -16,6 +16,14 @@ export default function CSARReport({ studentId, examId }: { studentId: string, e
   }, [studentId, examId]);
 
   if (!report) return <div>Loading...</div>;
+  if (report.error || !report.difficultyGrid) {
+    return (
+      <div className="p-6 bg-white shadow rounded">
+        <h2 className="text-2xl font-bold mb-4 text-red-600">Database Connection Required</h2>
+        <p>Please configure your DATABASE_URL to view live CSAR metrics.</p>
+      </div>
+    );
+  }
 
   const { metrics, difficultyGrid } = report;
 
@@ -70,6 +78,43 @@ export default function CSARReport({ studentId, examId }: { studentId: string, e
         <div className="w-64">
           <Doughnut data={donutData} />
         </div>
+      </div>
+
+      <div className="mt-8 border-t pt-6">
+        <h3 className="text-xl font-bold mb-4">Faculty Feedback & Mentors Note</h3>
+        <form className="space-y-4" onSubmit={async (e) => {
+          e.preventDefault();
+          const fd = new FormData(e.currentTarget);
+          await fetch('/api/feedback', {
+            method: 'POST',
+            body: JSON.stringify(Object.fromEntries(fd.entries())),
+            headers: {'Content-Type': 'application/json'}
+          });
+          alert('Saved Feedback');
+        }}>
+          <input type="hidden" name="studentId" value={studentId} />
+          <input type="hidden" name="examId" value={examId} />
+          
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-semibold mb-1">Strengths</label>
+              <textarea name="strengths" className="w-full border p-2 rounded" rows={3}></textarea>
+            </div>
+            <div>
+              <label className="block text-sm font-semibold mb-1">Areas of Concern</label>
+              <textarea name="areasOfConcern" className="w-full border p-2 rounded" rows={3}></textarea>
+            </div>
+            <div>
+              <label className="block text-sm font-semibold mb-1">Improvement Plan</label>
+              <textarea name="improvementPlan" className="w-full border p-2 rounded" rows={3}></textarea>
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-semibold mb-1">Mentors Note</label>
+            <textarea name="mentorsNote" className="w-full border p-2 rounded" rows={4} placeholder="Detailed qualitative feedback..."></textarea>
+          </div>
+          <button type="submit" className="bg-indigo-600 text-white px-4 py-2 rounded">Save Report</button>
+        </form>
       </div>
     </div>
   );

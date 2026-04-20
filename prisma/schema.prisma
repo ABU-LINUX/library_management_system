@@ -19,6 +19,7 @@ model Student {
   fees            FeeLedger?
   attendances     Attendance[]
   performances    StudentPerformance[]
+  csarFeedbacks   CSARFeedback[]
 }
 
 model FeeLedger {
@@ -44,8 +45,9 @@ model Exam {
   date            DateTime
   subject         String   // "Physics", "Chemistry", "Maths", "Biology"
   topic           String
-  maxMarks        Int      @default(100)
+  maxMarks        Int      @default(300)
   questions       Question[]
+  csarFeedbacks   CSARFeedback[]
 }
 
 model Question {
@@ -55,6 +57,7 @@ model Question {
   rawLatex        String   // The raw string. Do not escape on the frontend before sending.
   difficulty      String   // "EASY", "MEDIUM", "HARD"
   conceptTag      String   // e.g., "Thermodynamics", "Mole Concept"
+  format          String   @default("MCQ") // "MCQ", "NUMERICAL", "MATCH", "STATEMENT"
   performances    StudentPerformance[]
 }
 
@@ -67,4 +70,19 @@ model StudentPerformance {
   isAttempted     Boolean
   isCorrect       Boolean
   examId          String   // Denormalized for faster N-Exam querying
+}
+
+model CSARFeedback {
+  id              String   @id @default(uuid())
+  studentId       String
+  examId          String
+  student         Student  @relation(fields: [studentId], references: [id])
+  exam            Exam     @relation(fields: [examId], references: [id])
+  strengths       String
+  areasOfConcern  String
+  improvementPlan String
+  mentorsNote     String
+  createdAt       DateTime @default(now())
+
+  @@unique([studentId, examId])
 }

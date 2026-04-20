@@ -8,13 +8,14 @@ export default function ExamCreator({ examId }: { examId: string }) {
   const [rawLatex, setRawLatex] = useState('');
   const [difficulty, setDifficulty] = useState('EASY');
   const [conceptTag, setConceptTag] = useState('');
+  const [format, setFormat] = useState('MCQ');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     await fetch('/api/questions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ examId, rawLatex, difficulty, conceptTag }),
+      body: JSON.stringify({ examId, rawLatex, difficulty, conceptTag, format }),
     });
     alert('Question added successfully!');
     setRawLatex('');
@@ -43,6 +44,16 @@ export default function ExamCreator({ examId }: { examId: string }) {
               <option value="EASY">EASY</option>
               <option value="MEDIUM">MEDIUM</option>
               <option value="HARD">HARD</option>
+            </select>
+            <select 
+              value={format} 
+              onChange={(e) => setFormat(e.target.value)}
+              className="p-2 border rounded"
+            >
+              <option value="MCQ">Standard MCQ</option>
+              <option value="NUMERICAL">Numerical Value</option>
+              <option value="MATCH">Match the Following</option>
+              <option value="STATEMENT">Statement-based</option>
             </select>
             <input 
               type="text" 
