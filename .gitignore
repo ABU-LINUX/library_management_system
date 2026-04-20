@@ -15,3 +15,6 @@ receipts/*.pdf
 
 .DS_Store
 config/credentials.json
+node_modules/
+.next/
+.env*

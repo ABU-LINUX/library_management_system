@@ -4,7 +4,32 @@
   "description": "",
   "main": "patch.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.0.0",
+    "chart.js": "^4.0.0",
+    "katex": "^0.16.0",
+    "lucide-react": "^0.300.0",
+    "next": "14.2.3",
+    "prisma": "^5.0.0",
+    "react": "^18",
+    "react-chartjs-2": "^5.0.0",
+    "react-dom": "^18",
+    "react-katex": "^3.0.1",
+    "recharts": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "autoprefixer": "^10.5.0",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5"
   },
   "keywords": [],
   "author": "",

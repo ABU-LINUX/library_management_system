@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Student {
+  id              String   @id @default(uuid())
+  fullName        String
+  studentPhone    String   @unique
+  parentPhone     String
+  address         String
+  batch           String   // e.g., "2-Year IIT-JEE", "2-Year NEET", "Class 12 Boards"
+  photoUrl        String?
+  createdAt       DateTime @default(now())
+  fees            FeeLedger?
+  attendances     Attendance[]
+  performances    StudentPerformance[]
+}
+
+model FeeLedger {
+  id              String   @id @default(uuid())
+  studentId       String   @unique
+  student         Student  @relation(fields: [studentId], references: [id])
+  totalSettlement Float
+  totalPaid       Float    @default(0)
+  installments    Json     // Array of { amount, dueDate, status: 'PAID'|'PENDING' }
+}
+
+model Attendance {
+  id              String   @id @default(uuid())
+  studentId       String
+  student         Student  @relation(fields: [studentId], references: [id])
+  date            DateTime
+  status          String   // "PRESENT", "ABSENT", "LATE"
+}
+
+model Exam {
+  id              String   @id @default(uuid())
+  name            String   // e.g., "Part Test 1 (JEE MAINS)"
+  date            DateTime
+  subject         String   // "Physics", "Chemistry", "Maths", "Biology"
+  topic           String
+  maxMarks        Int      @default(100)
+  questions       Question[]
+}
+
+model Question {
+  id              String   @id @default(uuid())
+  examId          String
+  exam            Exam     @relation(fields: [examId], references: [id])
+  rawLatex        String   // The raw string. Do not escape on the frontend before sending.
+  difficulty      String   // "EASY", "MEDIUM", "HARD"
+  conceptTag      String   // e.g., "Thermodynamics", "Mole Concept"
+  performances    StudentPerformance[]
+}
+
+model StudentPerformance {
+  id              String   @id @default(uuid())
+  studentId       String
+  questionId      String
+  student         Student  @relation(fields: [studentId], references: [id])
+  question        Question @relation(fields: [questionId], references: [id])
+  isAttempted     Boolean
+  isCorrect       Boolean
+  examId          String   // Denormalized for faster N-Exam querying
+}
