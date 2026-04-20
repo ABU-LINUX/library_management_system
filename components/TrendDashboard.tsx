@@ -70,7 +70,7 @@ export default function TrendDashboard({ studentId }: { studentId: string }) {
 
       <div className="grid grid-cols-2 gap-6">
         <div className="bg-green-50 p-4 rounded">
-          <h3 className="text-lg font-bold text-green-700 mb-2">Strong Concepts (>70%)</h3>
+          <h3 className="text-lg font-bold text-green-700 mb-2">Strong Concepts ({'>'}70%)</h3>
           <ul className="list-disc pl-5">
             {conceptData.strong?.map((c: any) => (
               <li key={c.tag} className="text-green-800">{c.tag} ({c.accuracy.toFixed(1)}%)</li>
