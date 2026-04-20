@@ -2,6 +2,10 @@
     "version": 2,
     "builds": [
         {
+            "src": "package.json",
+            "use": "@vercel/next"
+        },
+        {
             "src": "backend/app.py",
             "use": "@vercel/python",
             "config": {
@@ -14,10 +18,10 @@
         }
     ],
     "routes": [
-        {
-            "src": "/(.*)",
-            "dest": "backend/app.py"
-        }
+        { "src": "/champions(.*)", "dest": "/champions$1" },
+        { "src": "/api/(.*)", "dest": "/api/$1" },
+        { "src": "/_next/(.*)", "dest": "/_next/$1" },
+        { "src": "/(.*)", "dest": "backend/app.py" }
     ],
     "crons": [
         {
